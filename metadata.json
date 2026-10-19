@@ -1,0 +1,6 @@
+{
+  "name": "AI Placement Mentor",
+  "description": "Comprehensive placement preparation platform with AI coding coach, career roadmaps, scenario interviews, scikit-learn ML recommendation engine, daily technical concepts & quizzes, and ATS resume builder.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

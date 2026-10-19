@@ -1,0 +1,1100 @@
+/**
+ * AI Placement Mentor - Rich Seed Data
+ * Contains realistic, verified data for roles, roadmaps, DSA coding challenges,
+ * daily tech posters with real engineering citations, quizzes, scenario interviews, and projects.
+ */
+
+import {
+  JobRole,
+  RoleInfo,
+  Roadmap,
+  CodingProblem,
+  DailyTechPoster,
+  QuizQuestion,
+  ScenarioInterview,
+  ProjectRecommendation,
+} from '../types/index.ts';
+
+export const SEED_ROLES: RoleInfo[] = [
+  {
+    id: 'Software Developer',
+    title: 'Software Developer / SDE',
+    tagline: 'Build scalable distributed systems, robust APIs, and performant user applications.',
+    description: 'Focuses on core computer science foundations, data structures, algorithms, object-oriented design, system architecture, clean coding practices, and full-stack software delivery.',
+    market_demand: 'Extremely High',
+    avg_salary_range: '₹8 - 25 LPA (India) / $85k - 140k (Global)',
+    core_skills: ['Data Structures & Algorithms', 'System Design (LLD/HLD)', 'OOP & Design Patterns', 'REST & GraphQL APIs', 'RDBMS & NoSQL Databases', 'Concurrency & Multithreading'],
+    tools_frameworks: ['Java/Spring Boot', 'Python/FastAPI', 'Node.js/Express', 'React/Next.js', 'PostgreSQL', 'Docker', 'Git'],
+    career_paths: ['SDE-1', 'SDE-2 (Senior)', 'Staff Engineer', 'Engineering Manager'],
+    top_hiring_companies: ['Google', 'Microsoft', 'Amazon', 'Atlassian', 'Flipkart', 'Cisco', 'Salesforce']
+  },
+  {
+    id: 'Data Analyst',
+    title: 'Data Analyst / BI Engineer',
+    tagline: 'Transform raw data into strategic business insights through SQL, modeling, and storytelling.',
+    description: 'Bridges technical data warehousing with business decision making. Requires expert SQL, data manipulation, statistical analysis, KPI metric formulation, and interactive dashboarding.',
+    market_demand: 'High',
+    avg_salary_range: '₹6 - 16 LPA (India) / $70k - 110k (Global)',
+    core_skills: ['Advanced SQL (Window Functions, CTEs)', 'Data Cleaning & Wrangling', 'Exploratory Data Analysis (EDA)', 'Business Intelligence & Storytelling', 'Applied Statistics', 'Metric Formulation'],
+    tools_frameworks: ['PostgreSQL/BigQuery', 'Python (Pandas, NumPy, Seaborn)', 'Power BI', 'Tableau', 'Excel/Google Sheets', 'dbt'],
+    career_paths: ['Junior Analyst', 'Senior Data Analyst', 'Lead Analytics Engineer', 'Head of Business Intelligence'],
+    top_hiring_companies: ['Deloitte', 'McKinsey', 'Swiggy', 'Zomato', 'Fractal', 'Accenture', 'Mu Sigma']
+  },
+  {
+    id: 'Data Scientist',
+    title: 'Data Scientist / Applied Scientist',
+    tagline: 'Develop predictive machine learning models, run hypothesis testing, and discover complex patterns.',
+    description: 'Combines computer science, probability, mathematical statistics, and machine learning to construct predictive pipelines, experiment frameworks (A/B testing), and recommendation algorithms.',
+    market_demand: 'Very High',
+    avg_salary_range: '₹10 - 28 LPA (India) / $95k - 160k (Global)',
+    core_skills: ['Supervised & Unsupervised ML', 'Probability & Inferential Statistics', 'Hypothesis Testing & A/B Experimentation', 'Feature Engineering', 'Model Evaluation & Drift Detection', 'MLOps Basics'],
+    tools_frameworks: ['Python (scikit-learn, SciPy, Statsmodels)', 'PyTorch/TensorFlow', 'Pandas & Polars', 'SQL', 'MLflow', 'Jupyter'],
+    career_paths: ['Associate Data Scientist', 'Senior Data Scientist', 'Principal Scientist', 'Director of Data Science'],
+    top_hiring_companies: ['Microsoft', 'Uber', 'Walmart Global Tech', 'American Express', 'Target', 'Adobe', 'PayPal']
+  },
+  {
+    id: 'AI/ML Engineer',
+    title: 'AI / Machine Learning Engineer',
+    tagline: 'Architect and deploy production-grade deep learning, LLMs, RAG pipelines, and model serving infrastructure.',
+    description: 'Specializes in scaling models from research into low-latency production microservices. Covers transformer architectures, vector embeddings, fine-tuning, GPU acceleration, and LLM orchestration.',
+    market_demand: 'Rapidly Growing',
+    avg_salary_range: '₹12 - 32 LPA (India) / $110k - 180k (Global)',
+    core_skills: ['Transformers & Attention Mechanisms', 'RAG (Retrieval Augmented Generation)', 'Vector Databases & Semantic Search', 'Model Quantization & Inference Optimization', 'Containerization & GPU Serving', 'Prompt Engineering & Evaluation'],
+    tools_frameworks: ['PyTorch', 'Hugging Face Transformers', 'LangChain/LlamaIndex', 'vLLM/Triton', 'Qdrant/Milvus/Pinecone', 'Docker & Kubernetes'],
+    career_paths: ['AI Engineer', 'Senior MLOps/AI Engineer', 'AI Architect', 'VP of Artificial Intelligence'],
+    top_hiring_companies: ['Google Cloud', 'NVIDIA', 'Meta', 'Anthropic', 'OpenAI ecosystem partners', 'Qualcomm', 'PhonePe']
+  },
+  {
+    id: 'Cybersecurity Analyst',
+    title: 'Cybersecurity Analyst / SecOps',
+    tagline: 'Safeguard networks, applications, and cloud assets from adversarial vulnerabilities and attacks.',
+    description: 'Protects critical organizational infrastructure. Encompasses penetration testing, threat hunting, vulnerability management, security information & event management (SIEM), and incident response.',
+    market_demand: 'Very High',
+    avg_salary_range: '₹7 - 20 LPA (India) / $80k - 135k (Global)',
+    core_skills: ['Network Security & Protocols (TCP/IP, DNS, TLS)', 'OWASP Top 10 Web Vulnerabilities', 'Identity & Access Management (IAM, Zero Trust)', 'Incident Response & Digital Forensics', 'Cryptography & Public Key Infrastructure', 'Threat Modeling'],
+    tools_frameworks: ['Wireshark', 'Burp Suite', 'Splunk/ELK SIEM', 'Nmap', 'Metasploit', 'Snort', 'Linux Hardening'],
+    career_paths: ['Security Analyst (SOC L1/L2)', 'Penetration Tester', 'Cloud Security Architect', 'Chief Information Security Officer (CISO)'],
+    top_hiring_companies: ['Palo Alto Networks', 'CrowdStrike', 'Cisco', 'EY', 'KPMG', 'TCS Cyber Defense', 'Infosys']
+  },
+  {
+    id: 'Cloud Engineer',
+    title: 'Cloud / DevOps / Infrastructure Engineer',
+    tagline: 'Design resilient multi-cloud architectures, automate CI/CD pipelines, and guarantee high availability.',
+    description: 'Ensures systems run seamlessly 24/7 at cloud scale. Master Infrastructure as Code (IaC), continuous integration/continuous deployment, container orchestration, and observability.',
+    market_demand: 'Extremely High',
+    avg_salary_range: '₹8 - 24 LPA (India) / $90k - 150k (Global)',
+    core_skills: ['Cloud Providers (AWS / GCP / Azure)', 'Infrastructure as Code (Terraform)', 'Container Orchestration (Kubernetes)', 'CI/CD Automation', 'Site Reliability & Monitoring', 'Linux System Administration & Networking'],
+    tools_frameworks: ['Terraform', 'Kubernetes', 'Docker', 'GitHub Actions / Jenkins', 'Prometheus & Grafana', 'AWS Lambda / Cloud Run', 'Helm'],
+    career_paths: ['Cloud Support Engineer', 'DevOps Engineer', 'Site Reliability Engineer (SRE)', 'Principal Cloud Architect'],
+    top_hiring_companies: ['Amazon Web Services', 'Google Cloud', 'Oracle Cloud', 'Red Hat', 'Cognizant', 'Wipro', 'Capgemini']
+  }
+];
+
+export const SEED_ROADMAPS: Record<JobRole, Roadmap> = {
+  'Software Developer': {
+    role_id: 'Software Developer',
+    total_weeks: 16,
+    overview: 'Structured 16-week path from programming mastery & algorithmic thinking to production system design and campus placement readiness.',
+    phases: [
+      {
+        phase_id: 'p1',
+        title: 'Phase 1: Foundations & Algorithmic Thinking (Weeks 1-4)',
+        description: 'Solidify your core language (Java, C++, or Python), asymptotic complexity (Big-O), and essential linear data structures.',
+        milestones: [
+          {
+            week_number: 1,
+            phase_name: 'Phase 1',
+            title: 'Asymptotic Analysis & Array Masterclass',
+            description: 'Time and space complexity proofs, two-pointer paradigms, prefix sums, and sliding window fundamentals.',
+            topics: ['Time/Space Complexity (Big-O, Omega, Theta)', 'Dynamic Arrays & Memory Layout', 'Two Pointers (Left-Right & Fast-Slow)', 'Sliding Window Fixed & Variable Size'],
+            prerequisites: ['Basic syntax in Java/Python/C++'],
+            curated_resources: [
+              { title: 'Big-O Cheat Sheet & Complexity Guide', url: 'https://www.bigocheatsheet.com/', type: 'Documentation', estimated_time: '2 hours' },
+              { title: 'NeetCode Roadmap - Arrays & Hashing', url: 'https://neetcode.io/roadmap', type: 'Interactive', estimated_time: '6 hours' }
+            ],
+            practical_milestone: 'Solve 10 LeetCode Easy/Medium array problems (Two Sum, Best Time to Buy Stock, 3Sum)'
+          },
+          {
+            week_number: 2,
+            phase_name: 'Phase 1',
+            title: 'Strings, Hash Tables & Bitwise Manipulations',
+            description: 'Character encoding, frequency maps, rolling hash (Rabin-Karp intuition), and bitwise tricks.',
+            topics: ['Hash Collision Resolution Strategies', 'String Immutability & String Builders', 'Bit Manipulation (XOR, Masking, Shifts)', 'Anagrams & Substring Search'],
+            prerequisites: ['Week 1 Arrays'],
+            curated_resources: [
+              { title: 'MIT 6.006 Hash Tables Lecture', url: 'https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/', type: 'Course', estimated_time: '3 hours' },
+              { title: 'String Algorithms in Competitive Programming', url: 'https://cp-algorithms.com/string/string-hashing.html', type: 'Documentation', estimated_time: '4 hours' }
+            ],
+            practical_milestone: 'Implement custom HashMap with separate chaining and solve Longest Substring Without Repeating Characters'
+          },
+          {
+            week_number: 3,
+            phase_name: 'Phase 1',
+            title: 'Linked Lists, Stacks & Queues',
+            description: 'Pointer manipulation, recursion on nodes, monotonic stacks, and circular queue ring buffers.',
+            topics: ['Singly & Doubly Linked Lists', 'Fast & Slow Pointer Cycle Detection (Floyd algorithm)', 'Monotonic Stack for Next Greater Element', 'LRU Cache Design Basics'],
+            prerequisites: ['Pointers and Memory References'],
+            curated_resources: [
+              { title: 'Visualgo - Linked List & Stack Visualizer', url: 'https://visualgo.net/en/list', type: 'Interactive', estimated_time: '2 hours' }
+            ],
+            practical_milestone: 'Solve Reverse Linked List, Valid Parentheses, Daily Temperatures, and Implement LRU Cache'
+          },
+          {
+            week_number: 4,
+            phase_name: 'Phase 1',
+            title: 'Recursion, Backtracking & Divide-and-Conquer',
+            description: 'Call stack frames, base cases, recursion trees, permutation generation, and prune conditions.',
+            topics: ['Recursion Tree Analysis', 'Subsets, Combinations & Permutations', 'N-Queens & Sudoku Solver Backtracking', 'Merge Sort & Quick Sort Partitioning'],
+            prerequisites: ['Stacks & Function Call Lifecycles'],
+            curated_resources: [
+              { title: 'Stanford CS106B Backtracking Lecture Notes', url: 'https://web.stanford.edu/class/archive/cs/cs106b/cs106b.1206/', type: 'Article', estimated_time: '4 hours' }
+            ],
+            practical_milestone: 'Implement QuickSort and solve Word Search & Subsets II without duplicates'
+          }
+        ]
+      },
+      {
+        phase_id: 'p2',
+        title: 'Phase 2: Non-Linear Structures & Dynamic Programming (Weeks 5-8)',
+        description: 'Master binary trees, binary search trees, heaps/priority queues, graphs, and dynamic programming.',
+        milestones: [
+          {
+            week_number: 5,
+            phase_name: 'Phase 2',
+            title: 'Trees & Binary Search Trees',
+            description: 'Tree traversals (In-order, Pre-order, Post-order, Level-order BFS), BST invariant properties, and tree heights.',
+            topics: ['Binary Tree DFS & BFS', 'BST Insertion, Deletion & Search', 'Lowest Common Ancestor (LCA)', 'Trie (Prefix Tree) Implementation'],
+            prerequisites: ['Recursion & Queues'],
+            curated_resources: [
+              { title: 'GeeksforGeeks Binary Tree Traversals', url: 'https://www.geeksforgeeks.org/tree-traversals-inorder-preorder-and-postorder/', type: 'Documentation', estimated_time: '3 hours' }
+            ],
+            practical_milestone: 'Solve Invert Binary Tree, Validate BST, Binary Tree Level Order Traversal, and Implement Trie'
+          },
+          {
+            week_number: 6,
+            phase_name: 'Phase 2',
+            title: 'Graphs: Traversals, TopoSort & Shortest Paths',
+            description: 'Adjacency lists/matrices, BFS shortest path on unweighted graphs, DFS cycle detection, Kahn algorithm, and Dijkstra.',
+            topics: ['Graph Representations & Visited Sets', 'Connected Components & Island Problems', 'Topological Sort for Dependency Resolution', 'Dijkstra Shortest Path with Min-Heap'],
+            prerequisites: ['Queue, Heap & Tree DFS'],
+            curated_resources: [
+              { title: 'WilliamFiset Graph Theory Series', url: 'https://www.youtube.com/playlist?list=PLDV1Zeh2NRsDGO4--qE8yH72HFL1Km93P', type: 'Course', estimated_time: '5 hours' }
+            ],
+            practical_milestone: 'Solve Number of Islands, Course Schedule I & II, and Network Delay Time'
+          },
+          {
+            week_number: 7,
+            phase_name: 'Phase 2',
+            title: 'Dynamic Programming: 1D & 2D Memoization to Tabulation',
+            description: 'Identifying overlapping subproblems and optimal substructure. State definition, transitions, and space optimization.',
+            topics: ['Top-down Memoization vs Bottom-up Tabulation', '0/1 Knapsack & Unbounded Knapsack', 'Longest Common Subsequence (LCS)', 'Coin Change & House Robber'],
+            prerequisites: ['Recursion & Trees'],
+            curated_resources: [
+              { title: 'Errichto Dynamic Programming Tutorial', url: 'https://codeforces.com/blog/entry/67634', type: 'Article', estimated_time: '4 hours' }
+            ],
+            practical_milestone: 'Solve Climbing Stairs, Coin Change, Longest Increasing Subsequence, and Edit Distance'
+          },
+          {
+            week_number: 8,
+            phase_name: 'Phase 2',
+            title: 'Advanced DP & Heaps/Priority Queues',
+            description: 'Interval DP, DP on grids, min-heap/max-heap array representations, and streaming top-K elements.',
+            topics: ['Median of Data Stream with Two Heaps', 'Grid DP with Obstacles', 'Palindromic Partitioning', 'State Compression DP Basics'],
+            prerequisites: ['Week 7 DP'],
+            curated_resources: [
+              { title: 'LeetCode Discuss: Comprehensive DP Patterns', url: 'https://leetcode.com/discuss/general-discussion/458695/dynamic-programming-patterns', type: 'Article', estimated_time: '3 hours' }
+            ],
+            practical_milestone: 'Solve Find Median from Data Stream and Burst Balloons'
+          }
+        ]
+      },
+      {
+        phase_id: 'p3',
+        title: 'Phase 3: System Design & Backend Architecture (Weeks 9-12)',
+        description: 'Transition from single-machine algorithms to scalable distributed systems and production database design.',
+        milestones: [
+          {
+            week_number: 9,
+            phase_name: 'Phase 3',
+            title: 'Low-Level Design (LLD) & Object-Oriented Design',
+            description: 'SOLID principles, Factory, Strategy, Observer, Singleton, Decorator patterns, and UML class diagrams.',
+            topics: ['Single Responsibility, Open/Closed, Liskov, ISP, Dependency Inversion', 'Design Patterns in Action', 'Designing Parking Lot / Elevator / Tic-Tac-Toe', 'Schema Normalization (1NF, 2NF, 3NF, BCNF)'],
+            prerequisites: ['OOP Basics in Java/C++/Python'],
+            curated_resources: [
+              { title: 'Refactoring.Guru - Design Patterns', url: 'https://refactoring.guru/design-patterns', type: 'Documentation', estimated_time: '5 hours' }
+            ],
+            practical_milestone: 'Complete modular OOP implementation for Parking Lot System with unit tests'
+          },
+          {
+            week_number: 10,
+            phase_name: 'Phase 3',
+            title: 'High-Level Design (HLD): Scalability & Networking',
+            description: 'Load balancers, CDN caching, stateless application servers, CAP theorem, and horizontal vs vertical scaling.',
+            topics: ['DNS, Reverse Proxies (Nginx), Load Balancing (Round Robin, Least Conn)', 'Caching Strategies (Write-Through, Write-Back, Cache-Aside)', 'CAP Theorem & PACELC Theorem', 'RESTful API Design & Status Codes'],
+            prerequisites: ['Networking fundamentals (HTTP, TCP)'],
+            curated_resources: [
+              { title: 'System Design Primer by Donne Martin', url: 'https://github.com/donnemartin/system-design-primer', type: 'Documentation', estimated_time: '8 hours' }
+            ],
+            practical_milestone: 'Design a scalable URL Shortener (TinyURL) handling 100M daily writes with Redis cache'
+          },
+          {
+            week_number: 11,
+            phase_name: 'Phase 3',
+            title: 'Database Internals, Indexing & Transactions',
+            description: 'B-Trees vs LSM Trees, composite indexes, query optimization, ACID transactions, locking, and sharding.',
+            topics: ['B+ Tree Index Internals', 'Isolation Levels (Read Committed, Repeatable Read, Serializable)', 'Database Sharding & Consistent Hashing', 'PostgreSQL EXPLAIN ANALYZE Query Plans'],
+            prerequisites: ['Basic SQL queries'],
+            curated_resources: [
+              { title: 'Use The Index, Luke! - SQL Indexing Guide', url: 'https://use-the-index-luke.com/', type: 'Documentation', estimated_time: '4 hours' }
+            ],
+            practical_milestone: 'Optimize a slow 5-table join query using appropriate composite indexes and explain query plan'
+          },
+          {
+            week_number: 12,
+            phase_name: 'Phase 3',
+            title: 'Message Queues, Microservices & Asynchronous Processing',
+            description: 'Event-driven architecture, message brokers (Kafka/RabbitMQ), idempotency keys, and distributed locks.',
+            topics: ['Publish-Subscribe vs Point-to-Point', 'Kafka Topics, Partitions, Consumer Groups', 'Idempotent Consumer Pattern', 'Handling Dead-Letter Queues (DLQ)'],
+            prerequisites: ['Week 10 HLD'],
+            curated_resources: [
+              { title: 'Apache Kafka Introduction & Core Concepts', url: 'https://kafka.apache.org/intro', type: 'Documentation', estimated_time: '4 hours' }
+            ],
+            practical_milestone: 'Build an asynchronous notification delivery service with retries and dead-letter queue'
+          }
+        ]
+      },
+      {
+        phase_id: 'p4',
+        title: 'Phase 4: Placement Sprints & Mock Rounds (Weeks 13-16)',
+        description: 'Timed technical coding assessments, behavioral STAR responses, scenario interviews, and ATS resume polish.',
+        milestones: [
+          {
+            week_number: 13,
+            phase_name: 'Phase 4',
+            title: 'Online Assessment (OA) Simulation Sprint',
+            description: 'Practice high-frequency company OA patterns under strict 60-90 minute time constraints.',
+            topics: ['Company OA Strategy & Time Allocation', 'Handling Corner Test Cases & Edge Cases', 'Brute Force to Optimized Transition under Pressure'],
+            prerequisites: ['Phases 1-2 DSA'],
+            curated_resources: [
+              { title: 'LeetCode Contest Platform', url: 'https://leetcode.com/contest/', type: 'Interactive', estimated_time: '4 hours' }
+            ],
+            practical_milestone: 'Complete 3 full-length timed assessments with 100% test case passing'
+          },
+          {
+            week_number: 14,
+            phase_name: 'Phase 4',
+            title: 'Scenario & System Architecture Rounds',
+            description: 'Practice interactive problem breakdown, clarifying questions, stating assumptions, and analyzing trade-offs.',
+            topics: ['Structuring 45-min System Design Interviews', 'Estimating Back-of-the-Envelope Math (QPS, Storage, Bandwidth)', 'Defending Architecture Choices & Bottlenecks'],
+            prerequisites: ['Phase 3 HLD'],
+            curated_resources: [
+              { title: 'Grokking the System Design Interview Guide', url: 'https://github.com/donnemartin/system-design-primer#system-design-interview-questions-with-solutions', type: 'Article', estimated_time: '6 hours' }
+            ],
+            practical_milestone: 'Complete 2 Scenario Interviews with AI Placement Mentor and achieve >= 80% score'
+          },
+          {
+            week_number: 15,
+            phase_name: 'Phase 4',
+            title: 'Behavioral & Leadership Principles (STAR Technique)',
+            description: 'Structure past academic and internship stories using Situation, Task, Action, and Measurable Result.',
+            topics: ['Handling Conflict in Team Projects', 'Explaining Technical Failures & What You Learned', 'Amazon 16 Leadership Principles & Google Googliness'],
+            prerequisites: ['Resume Projects'],
+            curated_resources: [
+              { title: 'Harvard Business Review - The STAR Method Guide', url: 'https://www.thebalancecareers.com/what-is-the-star-interview-response-technique-2061629', type: 'Article', estimated_time: '2 hours' }
+            ],
+            practical_milestone: 'Draft 5 STAR stories covering leadership, technical challenge, deadline crunch, and failure'
+          },
+          {
+            week_number: 16,
+            phase_name: 'Phase 4',
+            title: 'ATS Resume Finalization & Campus Placement Launch',
+            description: 'Quantify bullet points with XYZ format (Accomplished [X], as measured by [Y], by doing [Z]).',
+            topics: ['ATS Parsing Validation', 'Keyword Optimization for Target Companies', 'GitHub & Live Demo Portfolio Links Verification'],
+            prerequisites: ['All phases completed'],
+            curated_resources: [
+              { title: 'Google Tech Recruiter Resume Advice', url: 'https://www.youtube.com/watch?v=BYUy1Gv74PI', type: 'Course', estimated_time: '1 hour' }
+            ],
+            practical_milestone: 'Export ATS-verified PDF resume with score >= 90 from the Resume Builder'
+          }
+        ]
+      }
+    ]
+  },
+  // Additional roadmaps are dynamically provided or structured similarly
+  'Data Analyst': {
+    role_id: 'Data Analyst',
+    total_weeks: 14,
+    overview: 'Complete path covering Advanced SQL, Python data wrangling, statistical analysis, dashboard engineering (Power BI/Tableau), and business metrics.',
+    phases: [
+      {
+        phase_id: 'p1',
+        title: 'Phase 1: Advanced SQL & Data Warehousing (Weeks 1-4)',
+        description: 'Window functions, Common Table Expressions (CTEs), subqueries, aggregation, and dimensional modeling.',
+        milestones: [
+          {
+            week_number: 1,
+            phase_name: 'Phase 1',
+            title: 'Advanced SQL Filtering, Joins & Aggregations',
+            description: 'Master INNER, LEFT, RIGHT, FULL OUTER, CROSS joins and group aggregates with HAVING clauses.',
+            topics: ['Multi-table relational joins', 'NULL handling with COALESCE', 'HAVING vs WHERE execution order'],
+            prerequisites: ['Basic SQL syntax'],
+            curated_resources: [{ title: 'Mode Analytics SQL Tutorial', url: 'https://mode.com/sql-tutorial/', type: 'Interactive', estimated_time: '5 hours' }],
+            practical_milestone: 'Solve 15 HackerRank/LeetCode SQL Medium questions on joins and aggregates'
+          },
+          {
+            week_number: 2,
+            phase_name: 'Phase 1',
+            title: 'SQL Window Functions & Analytical Queries',
+            description: 'ROW_NUMBER(), RANK(), DENSE_RANK(), NTILE(), LAG(), LEAD(), and moving running sums.',
+            topics: ['PARTITION BY and ORDER BY clauses', 'Cumulative Running Totals', 'Year-Over-Year (YoY) Growth Calculations'],
+            prerequisites: ['Week 1 SQL'],
+            curated_resources: [{ title: 'PostgreSQL Window Function Docs', url: 'https://www.postgresql.org/docs/current/tutorial-window.html', type: 'Documentation', estimated_time: '3 hours' }],
+            practical_milestone: 'Write SQL query to find top 3 highest spending customers per month and 7-day rolling revenue'
+          }
+        ]
+      }
+    ]
+  },
+  'Data Scientist': {
+    role_id: 'Data Scientist',
+    total_weeks: 16,
+    overview: 'Rigorous journey through statistics, linear algebra, supervised/unsupervised machine learning, feature engineering, and model deployment.',
+    phases: [
+      {
+        phase_id: 'p1',
+        title: 'Phase 1: Math & Core Machine Learning (Weeks 1-4)',
+        description: 'Linear regression, logistic regression, gradient descent, regularization (L1/L2), and evaluation metrics.',
+        milestones: [
+          {
+            week_number: 1,
+            phase_name: 'Phase 1',
+            title: 'Linear & Logistic Regression Foundations',
+            description: 'Loss functions (MSE, Log-Loss), gradient descent mathematical derivation, decision boundaries, and overfitting.',
+            topics: ['Ordinary Least Squares', 'Sigmoid activation & Odds ratio', 'Lasso (L1) vs Ridge (L2) Regularization'],
+            prerequisites: ['Calculus & Matrix multiplication'],
+            curated_resources: [{ title: 'StatQuest with Josh Starmer - Machine Learning', url: 'https://statquest.org/', type: 'Course', estimated_time: '4 hours' }],
+            practical_milestone: 'Implement Logistic Regression from scratch in NumPy and verify against scikit-learn'
+          }
+        ]
+      }
+    ]
+  },
+  'AI/ML Engineer': {
+    role_id: 'AI/ML Engineer',
+    total_weeks: 16,
+    overview: 'Deep learning, attention architectures, RAG pipelines, fine-tuning, vector embeddings, and production low-latency inference.',
+    phases: [
+      {
+        phase_id: 'p1',
+        title: 'Phase 1: Deep Learning Foundations (Weeks 1-4)',
+        description: 'Neural networks, backpropagation, PyTorch tensors, autograd, and loss landscapes.',
+        milestones: [
+          {
+            week_number: 1,
+            phase_name: 'Phase 1',
+            title: 'PyTorch Tensors, Autograd & Neural Architectures',
+            description: 'Multi-layer perceptrons, forward & backward pass, optimizers (Adam, SGD), and dropout regularization.',
+            topics: ['Computation Graphs', 'PyTorch nn.Module & Dataset Loaders', 'Batch Normalization & Weight Initialization'],
+            prerequisites: ['Python & Linear Algebra'],
+            curated_resources: [{ title: 'Deep Learning with PyTorch Official Tutorials', url: 'https://pytorch.org/tutorials/', type: 'Documentation', estimated_time: '6 hours' }],
+            practical_milestone: 'Train an MLP on MNIST achieving >98% test accuracy in PyTorch'
+          }
+        ]
+      }
+    ]
+  },
+  'Cybersecurity Analyst': {
+    role_id: 'Cybersecurity Analyst',
+    total_weeks: 14,
+    overview: 'Network defense, vulnerability assessments, OWASP Top 10 web security, SIEM log monitoring, and incident response.',
+    phases: [
+      {
+        phase_id: 'p1',
+        title: 'Phase 1: Networking Protocols & Packet Analysis (Weeks 1-4)',
+        description: 'OSI 7-layer model, TCP 3-way handshakes, DNS, ARP poisoning, TLS certificates, and Wireshark inspection.',
+        milestones: [
+          {
+            week_number: 1,
+            phase_name: 'Phase 1',
+            title: 'Network Traffic Analysis with Wireshark',
+            description: 'Capturing, filtering, and diagnosing anomalous packet bursts, port scans, and cleartext credentials.',
+            topics: ['TCP flags (SYN, ACK, FIN, RST)', 'Wireshark Display Filters', 'Detecting SYN Flood DoS attacks'],
+            prerequisites: ['Basic computer networking concepts'],
+            curated_resources: [{ title: 'Wireshark User Guide', url: 'https://www.wireshark.org/docs/wsug_html_chunked/', type: 'Documentation', estimated_time: '4 hours' }],
+            practical_milestone: 'Analyze a .pcap file to identify infected host IP and exfiltrated HTTP data'
+          }
+        ]
+      }
+    ]
+  },
+  'Cloud Engineer': {
+    role_id: 'Cloud Engineer',
+    total_weeks: 14,
+    overview: 'AWS/GCP infrastructure, Docker containerization, Kubernetes orchestration, Terraform automation, and CI/CD pipelines.',
+    phases: [
+      {
+        phase_id: 'p1',
+        title: 'Phase 1: Linux, Containers & Cloud Fundamentals (Weeks 1-4)',
+        description: 'Linux shell scripting, namespaces, cgroups, multi-stage Docker builds, and VPC networking.',
+        milestones: [
+          {
+            week_number: 1,
+            phase_name: 'Phase 1',
+            title: 'Containerization with Docker & Docker Compose',
+            description: 'Writing minimal Alpine Dockerfiles, layer caching, volume mounts, and network bridges.',
+            topics: ['Docker Engine Architecture', 'Multi-stage Docker Builds for Node/Go', 'Docker Compose Multi-Container Stacks'],
+            prerequisites: ['Basic Linux terminal commands'],
+            curated_resources: [{ title: 'Docker Official Getting Started Guide', url: 'https://docs.docker.com/get-started/', type: 'Documentation', estimated_time: '4 hours' }],
+            practical_milestone: 'Containerize a full-stack React + Express + PostgreSQL app with docker-compose'
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export const SEED_CODING_PROBLEMS: CodingProblem[] = [
+  {
+    id: 'p-two-sum',
+    title: 'Two Sum',
+    slug: 'two-sum',
+    topic: 'arrays',
+    difficulty: 'Easy',
+    companies: ['Google', 'Amazon', 'Microsoft', 'Meta', 'Apple'],
+    description: 'Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.',
+    input_format: 'First line contains space-separated integers for nums, second line contains target integer.',
+    output_format: 'Array of two indices [i, j].',
+    constraints: [
+      '2 <= nums.length <= 10^4',
+      '-10^9 <= nums[i] <= 10^9',
+      '-10^9 <= target <= 10^9',
+      'Only one valid answer exists.'
+    ],
+    examples: [
+      { input: 'nums = [2,7,11,15], target = 9', output: '[0, 1]', explanation: 'Because nums[0] + nums[1] == 2 + 7 == 9, we return [0, 1].' },
+      { input: 'nums = [3,2,4], target = 6', output: '[1, 2]', explanation: 'nums[1] + nums[2] == 2 + 4 == 6, so indices are [1, 2].' }
+    ],
+    starter_code: {
+      python: 'def twoSum(nums: list[int], target: int) -> list[int]:\n    # Write your solution here\n    pass',
+      javascript: 'function twoSum(nums, target) {\n    // Write your solution here\n    \n}',
+      java: 'class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Write your solution here\n        return new int[]{};\n    }\n}'
+    },
+    test_cases: [
+      { input: 'nums = [2, 7, 11, 15], target = 9', expected_output: '[0, 1]' },
+      { input: 'nums = [3, 2, 4], target = 6', expected_output: '[1, 2]' },
+      { input: 'nums = [3, 3], target = 6', expected_output: '[0, 1]', is_hidden: true }
+    ],
+    hints: {
+      conceptual: 'A brute force approach checks every pair (O(n^2)). Can you check if the complement (target - current_number) has already been seen in O(1) time?',
+      algorithm: 'Iterate through the array while maintaining a Hash Map (dictionary) mapping value -> index. For each element num, compute complement = target - num.',
+      pseudocode: 'Initialize map = {}\nfor i, num in enumerate(nums):\n    diff = target - num\n    if diff in map:\n        return [map[diff], i]\n    map[num] = i\nreturn []',
+      solution: 'def twoSum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []'
+    }
+  },
+  {
+    id: 'p-valid-parentheses',
+    title: 'Valid Parentheses',
+    slug: 'valid-parentheses',
+    topic: 'stacks_queues',
+    difficulty: 'Easy',
+    companies: ['Amazon', 'Bloomberg', 'Microsoft', 'Goldman Sachs'],
+    description: 'Given a string s containing just the characters "(", ")", "{", "}", "[" and "]", determine if the input string is valid. An input string is valid if open brackets are closed by the same type of brackets and in the correct order.',
+    input_format: 'A string s containing bracket characters.',
+    output_format: 'Boolean (true / false).',
+    constraints: [
+      '1 <= s.length <= 10^4',
+      's consists of parentheses only: ()[]{}'
+    ],
+    examples: [
+      { input: 's = "()"', output: 'true' },
+      { input: 's = "()[]{}"', output: 'true' },
+      { input: 's = "(]"', output: 'false' }
+    ],
+    starter_code: {
+      python: 'def isValid(s: str) -> bool:\n    # Write your solution here\n    pass',
+      javascript: 'function isValid(s) {\n    // Write your solution here\n    \n}',
+      java: 'class Solution {\n    public boolean isValid(String s) {\n        // Write your solution here\n        return false;\n    }\n}'
+    },
+    test_cases: [
+      { input: 's = "()"', expected_output: 'true' },
+      { input: 's = "()[]{}"', expected_output: 'true' },
+      { input: 's = "([)]"', expected_output: 'false', is_hidden: true }
+    ],
+    hints: {
+      conceptual: 'Parentheses must follow Last-In, First-Out order. What fundamental data structure embodies LIFO?',
+      algorithm: 'Use a Stack. Push opening brackets onto the stack. When encountering a closing bracket, check if it matches the stack top element, then pop.',
+      pseudocode: 'stack = []\nmatching = { ")": "(", "}": "{", "]": "[" }\nfor char in s:\n    if char in matching.values():\n        stack.append(char)\n    elif char in matching:\n        if not stack or stack.pop() != matching[char]:\n            return False\nreturn len(stack) == 0',
+      solution: 'def isValid(s: str) -> bool:\n    stack = []\n    mapping = {")": "(", "}": "{", "]": "["}\n    for char in s:\n        if char in mapping:\n            top = stack.pop() if stack else "#"\n            if mapping[char] != top:\n                return False\n        else:\n            stack.append(char)\n    return not stack'
+    }
+  },
+  {
+    id: 'p-reverse-linked-list',
+    title: 'Reverse Linked List',
+    slug: 'reverse-linked-list',
+    topic: 'linked_lists',
+    difficulty: 'Easy',
+    companies: ['Apple', 'Microsoft', 'Adobe', 'Uber'],
+    description: 'Given the head of a singly linked list, reverse the list, and return the reversed list. Can you solve it both iteratively and recursively in O(n) time and O(1) extra space?',
+    input_format: 'head = [1,2,3,4,5]',
+    output_format: '[5,4,3,2,1]',
+    constraints: [
+      'The number of nodes in the list is the range [0, 5000].',
+      '-5000 <= Node.val <= 5000'
+    ],
+    examples: [
+      { input: 'head = [1,2,3,4,5]', output: '[5,4,3,2,1]' },
+      { input: 'head = [1,2]', output: '[2,1]' }
+    ],
+    starter_code: {
+      python: '# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\ndef reverseList(head):\n    # Write solution here\n    pass',
+      javascript: 'function reverseList(head) {\n    // Write solution here\n    \n}',
+      java: 'class Solution {\n    public ListNode reverseList(ListNode head) {\n        // Write solution here\n        return null;\n    }\n}'
+    },
+    test_cases: [
+      { input: 'head = [1,2,3,4,5]', expected_output: '[5,4,3,2,1]' },
+      { input: 'head = []', expected_output: '[]' }
+    ],
+    hints: {
+      conceptual: 'To reverse a direction of pointer A -> B, you need to point B -> A. What happens to the rest of the list when you break the link?',
+      algorithm: 'Maintain three pointers: prev (initially None), curr (initially head), and next_node (temporary storage before updating curr.next).',
+      pseudocode: 'prev = None\ncurr = head\nwhile curr is not None:\n    next_temp = curr.next\n    curr.next = prev\n    prev = curr\n    curr = next_temp\nreturn prev',
+      solution: 'def reverseList(head):\n    prev = None\n    curr = head\n    while curr:\n        next_node = curr.next\n        curr.next = prev\n        prev = curr\n        curr = next_node\n    return prev'
+    }
+  },
+  {
+    id: 'p-longest-substring-k',
+    title: 'Longest Substring Without Repeating Characters',
+    slug: 'longest-substring-without-repeating-characters',
+    topic: 'strings',
+    difficulty: 'Medium',
+    companies: ['Amazon', 'Google', 'Meta', 'Microsoft', 'Bloomberg'],
+    description: 'Given a string s, find the length of the longest substring without repeating characters. A substring is a contiguous non-empty sequence of characters within a string.',
+    input_format: 'A string s.',
+    output_format: 'Integer representing the maximum length.',
+    constraints: [
+      '0 <= s.length <= 5 * 10^4',
+      's consists of English letters, digits, symbols and spaces.'
+    ],
+    examples: [
+      { input: 's = "abcabcbb"', output: '3', explanation: 'The answer is "abc", with the length of 3.' },
+      { input: 's = "bbbbb"', output: '1', explanation: 'The answer is "b", with the length of 1.' },
+      { input: 's = "pwwkew"', output: '3', explanation: 'The answer is "wke", with length 3 ("pwke" is a subsequence, not substring).' }
+    ],
+    starter_code: {
+      python: 'def lengthOfLongestSubstring(s: str) -> int:\n    # Write your solution here\n    pass',
+      javascript: 'function lengthOfLongestSubstring(s) {\n    // Write your solution here\n    \n}',
+      java: 'class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        // Write solution here\n        return 0;\n    }\n}'
+    },
+    test_cases: [
+      { input: 's = "abcabcbb"', expected_output: '3' },
+      { input: 's = "bbbbb"', expected_output: '1' },
+      { input: 's = "pwwkew"', expected_output: '3' }
+    ],
+    hints: {
+      conceptual: 'Think of a dynamic sliding window [left, right] that expands until a duplicate is found, then contracts.',
+      algorithm: 'Use a Hash Map storing char -> last_seen_index. When char at right index is already inside current window (index >= left), advance left to last_seen_index + 1.',
+      pseudocode: 'char_map = {}\nleft = 0\nmax_len = 0\nfor right, char in enumerate(s):\n    if char in char_map and char_map[char] >= left:\n        left = char_map[char] + 1\n    char_map[char] = right\n    max_len = max(max_len, right - left + 1)\nreturn max_len',
+      solution: 'def lengthOfLongestSubstring(s: str) -> int:\n    char_index = {}\n    left = 0\n    max_len = 0\n    for right, char in enumerate(s):\n        if char in char_index and char_index[char] >= left:\n            left = char_index[char] + 1\n        char_index[char] = right\n        max_len = max(max_len, right - left + 1)\n    return max_len'
+    }
+  },
+  {
+    id: 'p-course-schedule',
+    title: 'Course Schedule (Cycle Detection & TopoSort)',
+    slug: 'course-schedule',
+    topic: 'trees_graphs',
+    difficulty: 'Medium',
+    companies: ['Google', 'Amazon', 'Twitter', 'Microsoft'],
+    description: 'There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [a_i, b_i] indicates that you must take course b_i first if you want to take course a_i. Return true if you can finish all courses. Otherwise, return false.',
+    input_format: 'numCourses = 2, prerequisites = [[1,0]]',
+    output_format: 'true or false',
+    constraints: [
+      '1 <= numCourses <= 2000',
+      '0 <= prerequisites.length <= 5000',
+      'prerequisites[i].length == 2',
+      'All the pairs prerequisites[i] are unique.'
+    ],
+    examples: [
+      { input: 'numCourses = 2, prerequisites = [[1,0]]', output: 'true', explanation: 'There are a total of 2 courses. To take course 1 you should have finished course 0. So it is possible.' },
+      { input: 'numCourses = 2, prerequisites = [[1,0],[0,1]]', output: 'false', explanation: 'Course 1 requires 0 and course 0 requires 1. Circular dependency makes it impossible.' }
+    ],
+    starter_code: {
+      python: 'def canFinish(numCourses: int, prerequisites: list[list[int]]) -> bool:\n    # Write your solution here\n    pass',
+      javascript: 'function canFinish(numCourses, prerequisites) {\n    // Write your solution here\n    \n}',
+      java: 'class Solution {\n    public boolean canFinish(int numCourses, int[][] prerequisites) {\n        // Write solution here\n        return false;\n    }\n}'
+    },
+    test_cases: [
+      { input: 'numCourses = 2, prerequisites = [[1,0]]', expected_output: 'true' },
+      { input: 'numCourses = 2, prerequisites = [[1,0],[0,1]]', expected_output: 'false' }
+    ],
+    hints: {
+      conceptual: 'Courses and prerequisites form a directed graph. Can you finish all courses if there is a directed cycle in the graph?',
+      algorithm: 'Kahn algorithm for Topological Sorting: Track in-degrees of all nodes. Enqueue all nodes with in-degree 0. As you process nodes, decrement neighbors in-degrees. If processed_count == numCourses, no cycle exists.',
+      pseudocode: 'adj = {i: [] for i in range(numCourses)}\nin_degree = [0] * numCourses\nfor dest, src in prerequisites:\n    adj[src].append(dest)\n    in_degree[dest] += 1\nqueue = [i for i in range(numCourses) if in_degree[i] == 0]\ncount = 0\nwhile queue:\n    node = queue.pop(0)\n    count += 1\n    for neighbor in adj[node]:\n        in_degree[neighbor] -= 1\n        if in_degree[neighbor] == 0:\n            queue.append(neighbor)\nreturn count == numCourses',
+      solution: 'from collections import deque\ndef canFinish(numCourses: int, prerequisites: list[list[int]]) -> bool:\n    adj = {i: [] for i in range(numCourses)}\n    in_degree = [0] * numCourses\n    for dest, src in prerequisites:\n        adj[src].append(dest)\n        in_degree[dest] += 1\n    queue = deque([i for i in range(numCourses) if in_degree[i] == 0])\n    visited = 0\n    while queue:\n        node = queue.popleft()\n        visited += 1\n        for nbr in adj[node]:\n            in_degree[nbr] -= 1\n            if in_degree[nbr] == 0:\n                queue.append(nbr)\n    return visited == numCourses'
+    }
+  },
+  {
+    id: 'p-coin-change',
+    title: 'Coin Change (Optimal Substructure DP)',
+    slug: 'coin-change',
+    topic: 'dynamic_programming',
+    difficulty: 'Medium',
+    companies: ['Amazon', 'Microsoft', 'Goldman Sachs', 'Flipkart'],
+    description: 'You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money. Return the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1. You may assume you have an infinite number of each kind of coin.',
+    input_format: 'coins = [1,2,5], amount = 11',
+    output_format: '3 (5 + 5 + 1 = 11)',
+    constraints: [
+      '1 <= coins.length <= 12',
+      '1 <= coins[i] <= 2^31 - 1',
+      '0 <= amount <= 10^4'
+    ],
+    examples: [
+      { input: 'coins = [1,2,5], amount = 11', output: '3', explanation: '11 = 5 + 5 + 1 requires 3 coins.' },
+      { input: 'coins = [2], amount = 3', output: '-1', explanation: 'Cannot form 3 using only 2s.' }
+    ],
+    starter_code: {
+      python: 'def coinChange(coins: list[int], amount: int) -> int:\n    # Write your solution here\n    pass',
+      javascript: 'function coinChange(coins, amount) {\n    // Write your solution here\n    \n}',
+      java: 'class Solution {\n    public int coinChange(int[] coins, int amount) {\n        // Write solution here\n        return -1;\n    }\n}'
+    },
+    test_cases: [
+      { input: 'coins = [1,2,5], amount = 11', expected_output: '3' },
+      { input: 'coins = [2], amount = 3', expected_output: '-1' },
+      { input: 'coins = [1], amount = 0', expected_output: '0', is_hidden: true }
+    ],
+    hints: {
+      conceptual: 'Greedy choice (taking the largest coin first) does not always work! Example: coins = [1, 3, 4], amount = 6. Greedy takes 4 + 1 + 1 (3 coins), but optimal is 3 + 3 (2 coins).',
+      algorithm: 'Define dp[i] as the minimum coins needed to make amount i. Base case: dp[0] = 0, all other dp[i] initialized to infinity. Transition: dp[i] = min(dp[i], dp[i - c] + 1) for all coins c <= i.',
+      pseudocode: 'dp = [inf] * (amount + 1)\ndp[0] = 0\nfor i in range(1, amount + 1):\n    for coin in coins:\n        if i - coin >= 0:\n            dp[i] = min(dp[i], dp[i - coin] + 1)\nreturn dp[amount] if dp[amount] != inf else -1',
+      solution: 'def coinChange(coins: list[int], amount: int) -> int:\n    dp = [float("inf")] * (amount + 1)\n    dp[0] = 0\n    for i in range(1, amount + 1):\n        for coin in coins:\n            if i - coin >= 0:\n                dp[i] = min(dp[i], dp[i - coin] + 1)\n    return dp[amount] if dp[amount] != float("inf") else -1'
+    }
+  },
+  {
+    id: 'p-sql-second-highest-salary',
+    title: 'SQL: Second Highest Salary & Dense Ranking',
+    slug: 'second-highest-salary',
+    topic: 'sql',
+    difficulty: 'Easy',
+    companies: ['Amazon', 'Adobe', 'Oracle', 'Cognizant'],
+    description: 'Write an SQL query to report the second highest salary from the Employee table. If there is no second highest salary, the query should report null.',
+    input_format: 'Table: Employee (id INT, salary INT)',
+    output_format: 'SecondHighestSalary (INT or NULL)',
+    constraints: ['id is the primary key column for this table.'],
+    examples: [
+      { input: 'Employee: [[1, 100], [2, 200], [3, 300]]', output: '200' },
+      { input: 'Employee: [[1, 100]]', output: 'null' }
+    ],
+    starter_code: {
+      python: '# SQL Query problem:\nSELECT ...',
+      javascript: '// SQL query:\nSELECT ...',
+      java: '// SQL query:\nSELECT ...',
+      sql: 'SELECT\n    -- Write your query here\n'
+    },
+    test_cases: [
+      { input: 'Employee with salaries [100, 200, 300]', expected_output: '200' }
+    ],
+    hints: {
+      conceptual: 'Be careful of duplicate salaries! If two employees share the top salary, the next distinct salary is the second highest.',
+      algorithm: 'Use MAX(salary) WHERE salary < (SELECT MAX(salary) FROM Employee) or use DENSE_RANK() OVER (ORDER BY salary DESC).',
+      pseudocode: 'SELECT MAX(salary) AS SecondHighestSalary FROM Employee WHERE salary < (SELECT MAX(salary) FROM Employee);',
+      solution: 'SELECT MAX(salary) AS SecondHighestSalary\nFROM Employee\nWHERE salary < (SELECT MAX(salary) FROM Employee);'
+    }
+  }
+];
+
+export const SEED_POSTERS: DailyTechPoster[] = [
+  {
+    id: 'poster-rag-architectures',
+    date: '2026-10-18',
+    topic_category: 'RAG & Vector DBs',
+    title: 'Retrieval-Augmented Generation (RAG) in Production',
+    tagline: 'Grounded enterprise intelligence without costly fine-tuning or stale LLM hallucinations.',
+    definition: 'Retrieval-Augmented Generation (RAG) is an architectural pattern that enhances large language model outputs by dynamically retrieving relevant, verifiable context from private enterprise document stores prior to generating responses.',
+    how_it_works: [
+      { step_number: 1, title: 'Document Ingestion & Chunking', detail: 'Source documentation (PDFs, Confluence, API specs) is broken into semantic chunks with token overlap to maintain cross-boundary context.' },
+      { step_number: 2, title: 'Vector Embedding Generation', detail: 'Dense mathematical embedding representations (e.g. 768 or 1536 dimensions) are generated using specialized embedding models.' },
+      { step_number: 3, title: 'Approximate Nearest Neighbor (ANN) Retrieval', detail: 'At query time, student or user prompt is embedded, and HNSW index retrieves top-K semantically closest chunks via cosine distance.' },
+      { step_number: 4, title: 'Context Augmentation & Grounded Prompting', detail: 'The retrieved chunks are injected into the system prompt with strict provenance constraints, prompting the LLM to cite sources.' }
+    ],
+    real_world_applications: [
+      'Customer support deflection with enterprise internal knowledge bases',
+      'Healthcare clinical guideline assistants citing published medical journals',
+      'Financial regulatory compliance search over thousands of SEC filings',
+      'Campus placement and coding assistants providing verified syntax documentation'
+    ],
+    practical_example: {
+      title: 'Python RAG Prompt Construction Pipeline',
+      language: 'python',
+      code_or_query: `def build_rag_prompt(user_query: str, retrieved_chunks: list[dict]) -> str:
+    context_str = "\\n\\n".join([
+        f"[Source {i+1} | {c['doc_title']}]:\\n{c['text']}" 
+        for i, c in enumerate(retrieved_chunks)
+    ])
+    return f"""You are a precise technical mentor. Answer using ONLY the provided verified context.
+If the answer cannot be established from the sources, state 'Information not found'.
+
+--- VERIFIED CONTEXT ---
+{context_str}
+
+--- STUDENT QUESTION ---
+{user_query}
+"""`,
+      explanation: 'Notice how documents are formatted with numbered citations. This allows the LLM to ground assertions in specific passages, preventing hallucinations.'
+    },
+    verified_company_use: {
+      company: 'Netflix TechBlog',
+      use_case: 'GenAI Knowledge Retrieval for Production Incident Triage',
+      architecture_context: 'Netflix engineers deployed hybrid sparse-dense retrieval over past incident post-mortems and microservice runbooks to suggest remediation playbooks during P0 alerts.',
+      source_link: 'https://netflixtechblog.com/',
+      citation_notes: 'Documented in Netflix Technology Blog case studies on GenAI developer productivity and operations automation.'
+    }
+  },
+  {
+    id: 'poster-vector-databases',
+    date: '2026-10-17',
+    topic_category: 'RAG & Vector DBs',
+    title: 'Vector Databases & HNSW Indexing',
+    tagline: 'How Hierarchical Navigable Small World graphs make million-vector similarity search run in sub-millisecond speeds.',
+    definition: 'Vector databases are specialized storage engines designed to store, index, and query high-dimensional vector embeddings efficiently using Approximate Nearest Neighbor (ANN) search algorithms.',
+    how_it_works: [
+      { step_number: 1, title: 'Multi-layer Skip List Topology', detail: 'HNSW builds hierarchical graph layers where top layers have sparse long-range highway edges and bottom layers have dense local clusters.' },
+      { step_number: 2, title: 'Greedy Routing Algorithm', detail: 'Search begins at the topmost layer finding local minima, then drops down layer by layer refining closest candidates.' },
+      { step_number: 3, title: 'Distance Metrics Computation', detail: 'Calculates Cosine Similarity, Dot Product, or Euclidean (L2) distance using SIMD CPU instructions or GPU vector registers.' },
+      { step_number: 4, title: 'Filtered Hybrid Search', detail: 'Applies boolean metadata filtering (e.g., user_id, date, role) concurrently with vector distance traversal.' }
+    ],
+    real_world_applications: [
+      'Visual reverse image search across e-commerce product catalogs',
+      'Spotify personalized music playlist recommendations based on audio embeddings',
+      'Fraud detection through behavioral pattern vector clustering'
+    ],
+    practical_example: {
+      title: 'Cosine Similarity vs Euclidean Distance in Vector Space',
+      language: 'python',
+      code_or_query: `import numpy as np
+
+def cosine_similarity(v1: np.ndarray, v2: np.ndarray) -> float:
+    # Measures the cosine of the angle between two vectors (directional alignment)
+    dot_product = np.dot(v1, v2)
+    norm_v1 = np.linalg.norm(v1)
+    norm_v2 = np.linalg.norm(v2)
+    return dot_product / (norm_v1 * norm_v2)
+
+# Normalizing vectors makes dot product equivalent to cosine similarity!
+vec_a = np.array([0.2, 0.8, -0.5])
+vec_b = np.array([0.1, 0.9, -0.4])
+print(f"Similarity: {cosine_similarity(vec_a, vec_b):.4f}")`,
+      explanation: 'In NLP and recommendation systems, vector length often reflects text length or frequency rather than semantic meaning; hence cosine similarity (orientation) is preferred over Euclidean distance.'
+    },
+    verified_company_use: {
+      company: 'Uber Engineering',
+      use_case: 'Vector Search for Uber Eats Dish Recommendations',
+      architecture_context: 'Uber uses vector indexing to match eater taste profiles with menu item representations in milliseconds across hundreds of thousands of active merchant menus.',
+      source_link: 'https://www.uber.com/blog/engineering/',
+      citation_notes: 'Published by Uber Engineering on deep learning representation models for real-time recommendations.'
+    }
+  },
+  {
+    id: 'poster-kafka-event-streaming',
+    date: '2026-10-16',
+    topic_category: 'DevOps & SRE',
+    title: 'Apache Kafka: High-Throughput Distributed Event Log',
+    tagline: 'Decoupling distributed microservices with sequential disk I/O and zero-copy data transfer.',
+    definition: 'Apache Kafka is a distributed event store and stream processing platform that models all data streams as immutable, partitioned append-only commit logs.',
+    how_it_works: [
+      { step_number: 1, title: 'Append-Only Commit Logs', detail: 'Messages are appended to the end of partition logs sequentially. Sequential disk writes are nearly as fast as random RAM access.' },
+      { step_number: 2, title: 'Partitioning & Consumer Groups', detail: 'Topics are partitioned across cluster brokers, enabling horizontal read/write scale across multiple consumers in a group.' },
+      { step_number: 3, title: 'Zero-Copy OS Transfer (sendfile)', detail: 'Kafka leverages the Linux OS sendfile syscall to stream data directly from OS page cache to network sockets without JVM memory copies.' },
+      { step_number: 4, title: 'Offset Tracking', detail: 'Consumers record their own progress via committed offsets in an internal __consumer_offsets topic, allowing message replaying.' }
+    ],
+    real_world_applications: [
+      'Financial transaction audit logs and real-time fraud alerts',
+      'Ride-sharing driver GPS telemetry location ingestion at 1M events/sec',
+      'Change Data Capture (CDC) syncing relational databases to search indexes'
+    ],
+    practical_example: {
+      title: 'Idempotent Kafka Consumer Pattern',
+      language: 'python',
+      code_or_query: `def process_placement_event(event: dict, processed_cache: set) -> None:
+    event_id = event.get("event_id")
+    # Idempotency guard: prevent duplicate processing in at-least-once delivery
+    if event_id in processed_cache:
+        print(f"Duplicate event {event_id} ignored.")
+        return
+
+    # Execute critical business logic
+    update_student_streak(event["student_id"])
+    processed_cache.add(event_id)`,
+      explanation: 'Because Kafka guarantees at-least-once delivery by default, consumers must implement idempotent logic (deduplication keys) to prevent duplicate side-effects during network retries.'
+    },
+    verified_company_use: {
+      company: 'Stripe TechBlog',
+      use_case: 'Financial Ledger and Payment Event Streaming',
+      architecture_context: 'Stripe utilizes distributed event streaming infrastructure to orchestrate multi-leg financial transfers with strict auditability and disaster recovery replication.',
+      source_link: 'https://stripe.com/blog/engineering',
+      citation_notes: 'Featured in Stripe Engineering blog articles on financial infrastructure idempotency and distributed reliability.'
+    }
+  }
+];
+
+export const SEED_QUIZZES: QuizQuestion[] = [
+  {
+    id: 'q-rag-1',
+    poster_id: 'poster-rag-architectures',
+    question: 'Why is Retrieval-Augmented Generation (RAG) generally preferred over continual model fine-tuning for frequently updated internal technical documentation?',
+    options: [
+      'RAG eliminates the need to run any LLM inference compute.',
+      'RAG decouples knowledge updates from model retraining, allowing near-instant updates with verifiable source citations.',
+      'Fine-tuning completely prevents hallucinations whereas RAG does not.',
+      'RAG only works with open-source models while fine-tuning is proprietary.'
+    ],
+    correct_index: 1,
+    explanation_correct: 'Correct! Fine-tuning embeds static weights requiring hours or days of compute, whereas RAG updates happen instantly by updating the vector index and passing retrieved passages in the prompt.',
+    explanation_distractors: [
+      'Incorrect: RAG still requires LLM inference compute to synthesize the prompt and retrieved documents.',
+      'Incorrect: Fine-tuning does not guarantee zero hallucinations and often causes model drift or catastrophic forgetting.',
+      'Incorrect: RAG works with both proprietary API models (Gemini, Claude) and open-weights models (Llama).'
+    ]
+  },
+  {
+    id: 'q-rag-2',
+    poster_id: 'poster-rag-architectures',
+    question: 'What is the primary trade-off when selecting chunk size during document embedding in a RAG pipeline?',
+    options: [
+      'Larger chunks provide more context to the LLM but dilute semantic specificity and consume more context window tokens.',
+      'Smaller chunks always produce better answers regardless of the topic.',
+      'Chunk size has no mathematical effect on vector embeddings.',
+      'Chunk sizes must be exact powers of 2 (e.g. 256, 512, 1024) or vector databases will reject them.'
+    ],
+    correct_index: 0,
+    explanation_correct: 'Correct! Large chunks capture broader paragraphs but might dilute the similarity vector; small chunks produce razor-sharp vector matches but may lose broader surrounding context.',
+    explanation_distractors: [
+      'Incorrect: Excessively small chunks (e.g., single sentences) lack context and can cause fragmented, confusing responses.',
+      'Incorrect: Vector embedding distance changes significantly depending on the chunked text.',
+      'Incorrect: Chunk sizes are measured in characters or tokens and do not have strict power-of-2 constraints.'
+    ]
+  },
+  {
+    id: 'q-rag-3',
+    poster_id: 'poster-rag-architectures',
+    question: 'In production RAG systems, what technique is commonly applied immediately AFTER vector retrieval and BEFORE sending context to the LLM?',
+    options: [
+      'Dropping all retrieved chunks that have vowels.',
+      'Re-ranking with a Cross-Encoder model to re-score candidate relevance.',
+      'Converting all text into hexadecimal format.',
+      'Re-training the foundation model weights.'
+    ],
+    correct_index: 1,
+    explanation_correct: 'Correct! Bi-encoder vector search retrieves candidates in milliseconds, and a cross-encoder re-ranker accurately scores the top 20-50 candidates to send the top 3-5 to the LLM.',
+    explanation_distractors: [
+      'Incorrect: Dropping vowels destroys textual semantics.',
+      'Incorrect: Hexadecimal format increases token count drastically with zero benefit.',
+      'Incorrect: Re-training weights during the request lifecycle is impossible for real-time retrieval.'
+    ]
+  },
+  {
+    id: 'q-vdb-1',
+    poster_id: 'poster-vector-databases',
+    question: 'What is the key advantage of HNSW (Hierarchical Navigable Small World) over Flat Indexing in vector similarity search?',
+    options: [
+      'Flat indexing is logarithmic O(log N) while HNSW is exponential.',
+      'Flat indexing calculates distance against every vector (O(N)), while HNSW approximates nearest neighbors in O(log N) through graph layers.',
+      'HNSW uses zero memory storage.',
+      'HNSW produces 100% mathematically exact nearest neighbors every time.'
+    ],
+    correct_index: 1,
+    explanation_correct: 'Correct! Flat indexing evaluates distance against all N vectors (exact but slow for large datasets). HNSW provides Approximate Nearest Neighbor (ANN) search with sub-millisecond logarithmic complexity.',
+    explanation_distractors: [
+      'Incorrect: Flat indexing is O(N) linear scan, not logarithmic.',
+      'Incorrect: HNSW requires additional memory to store multi-layer graph edge pointers.',
+      'Incorrect: HNSW is an ANN (approximate) algorithm with very high recall (e.g., 95-99%), not guaranteed 100% exact.'
+    ]
+  },
+  {
+    id: 'q-kafka-1',
+    poster_id: 'poster-kafka-event-streaming',
+    question: 'Why are consumers in Apache Kafka designed to be responsible for tracking their own offsets?',
+    options: [
+      'Because Kafka brokers do not have disks.',
+      'It keeps the broker stateless with respect to consumer read positions, maximizing broker throughput and enabling consumers to replay past data.',
+      'Consumers must store offsets to encrypt messages.',
+      'Kafka only supports a single consumer per topic.'
+    ],
+    correct_index: 1,
+    explanation_correct: 'Correct! Removing consumer state tracking from broker memory simplifies broker design and allows consumers to easily rewind offsets to re-process historical events.',
+    explanation_distractors: [
+      'Incorrect: Kafka brokers persist all partition data to disk sequentially.',
+      'Incorrect: Offset tracking is about position metadata, not payload encryption.',
+      'Incorrect: Kafka supports multiple consumer groups reading independently from the same topic.'
+    ]
+  }
+];
+
+export const SEED_SCENARIOS: ScenarioInterview[] = [
+  {
+    id: 'scenario-flash-sale',
+    role: 'Software Developer',
+    title: 'E-Commerce Flash Sale: Inventory Race Conditions & Database Overload',
+    company_context: 'Major e-commerce platform releasing 5,000 units of a heavily discounted flagship smartphone at exactly 12:00 PM. 1.2 million concurrent users hit the checkout endpoint within 30 seconds.',
+    business_problem: 'During the previous sale, database connection pool exhaustion caused a 15-minute complete site outage. Worse, overselling occurred: 5,420 orders were confirmed for 5,000 physical units, resulting in angry customers and refund penalties.',
+    technical_constraints: [
+      'Peak write traffic: 80,000 requests/sec',
+      'Zero overselling tolerance: Exactly 5,000 units must be reserved',
+      'Inventory database cannot handle more than 2,500 writes/sec directly',
+      'Max checkout latency must be under 300ms'
+    ],
+    sample_prompt: 'Walk me through your architectural strategy. How will you prevent database crashes, ensure concurrency safety against race conditions, and provide a fair, responsive experience for users who do not get the phone?',
+    evaluation_rubric: {
+      problem_clarification: 'Did the student ask about user authentication, bot traffic mitigation, or payment gateway timeout limits?',
+      assumptions: 'Did they state realistic assumptions regarding network throughput, caching layers, and payment confirmation windows?',
+      technical_correctness: 'Did they suggest Redis atomic decrements (DECR / Lua scripts) or distributed locks, rate limiting, and asynchronous queueing over direct SQL transactions?',
+      evidence_and_depth: 'Did they explain why optimistic locking (version column) in SQL fails under massive contention (leads to 99% rollbacks)?',
+      alternatives_and_tradeoffs: 'Did they discuss trade-offs between virtual waiting rooms vs synchronous reject vs queue-based reservation tokens?',
+      communication: 'Was the response structured logically with clear component breakdown and professional engineering terminology?'
+    }
+  },
+  {
+    id: 'scenario-data-pipeline-lag',
+    role: 'Data Analyst',
+    title: 'Executive Dashboard Discrepancy & ETL Pipeline Lag',
+    company_context: 'A fast-growing food delivery unicorn with leadership relying on real-time order volume and driver supply dashboards to allocate regional marketing budget.',
+    business_problem: 'At 9:00 AM on Monday, the Chief Commercial Officer notices that the executive Tableau dashboard reports a 42% drop in weekend revenue compared to the finance team spreadsheet, causing panic.',
+    technical_constraints: [
+      'Orders table ingestion involves CDC from MongoDB into Snowflake',
+      'Finance uses direct bank settlement summaries',
+      'ETL pipeline runs hourly micro-batches using Airflow and dbt'
+    ],
+    sample_prompt: 'How would you systematically triage this issue? How will you determine whether this is an actual business downturn, an Airflow pipeline failure, a timezone offset bug, or currency conversion discrepancy, and how will you communicate with leadership?',
+    evaluation_rubric: {
+      problem_clarification: 'Clarifies when the discrepancy began and checks pipeline execution statuses before making business assumptions.',
+      assumptions: 'Considers timezone boundary differences (UTC vs Local), pending transactions, or failed DAG runs in Airflow.',
+      technical_correctness: 'Suggests running row count reconciliations between raw staging and dimensional marts, checking dbt test assertions, and verifying Airflow task retry logs.',
+      evidence_and_depth: 'Explains specific SQL validation queries (e.g., comparing order timestamps with ingestion timestamps).',
+      alternatives_and_tradeoffs: 'Discusses temporary rollback vs urgent hotfix and automated alerting mechanisms for future pipeline health.',
+      communication: 'Maintains composure, provides clear executive summary with root cause and next steps without blaming teams.'
+    }
+  },
+  {
+    id: 'scenario-model-drift',
+    role: 'AI/ML Engineer',
+    title: 'Loan Default Prediction Model: Real-Time Concept Drift in Production',
+    company_context: 'Fintech digital lending platform issuing short-term working capital loans to micro-merchants using a gradient-boosted decision tree & deep embedding model.',
+    business_problem: 'Over the last 6 weeks, the default rate of newly approved loans surged from 2.1% to 6.8%. The business risk team demands an immediate explanation and mitigation strategy.',
+    technical_constraints: [
+      'Inference latency SLA: < 150ms per application',
+      'Regulatory compliance: Any feature used in scoring must be explainable (SHAP/LIME)',
+      'Training data spans 2023-2024, but macroeconomic interest rates and regional inflation spiked recently'
+    ],
+    sample_prompt: 'How would you evaluate whether this surge is caused by covariate shift, concept drift, or upstream data pipeline corruption? What steps will you take to detect, isolate, and safely deploy an updated model?',
+    evaluation_rubric: {
+      problem_clarification: 'Distinguishes between input data distribution shift P(X) and conditional probability change P(Y|X).',
+      assumptions: 'Identifies external macroeconomic variables and potential latency in ground truth label availability.',
+      technical_correctness: 'Proposes statistical drift metrics (Population Stability Index - PSI, Kolmogorov-Smirnov test, Wasserstein distance) and SHAP feature importance shifts.',
+      evidence_and_depth: 'Details shadow/canary model deployment, automated rollback thresholds, and retraining frequency with sample weighting.',
+      alternatives_and_tradeoffs: 'Discusses conservative threshold tightening vs aggressive retraining with sparse recent data.',
+      communication: 'Explains technical statistical concepts in business impact terms.'
+    }
+  }
+];
+
+export const SEED_PROJECTS: ProjectRecommendation[] = [
+  {
+    id: 'proj-distributed-rate-limiter',
+    title: 'Distributed API Rate Limiter & Token Bucket Gateway',
+    domain: 'Software Developer',
+    target_role: 'Software Developer',
+    difficulty: 'Intermediate',
+    problem_statement: 'Build a distributed, low-latency API rate limiting proxy service to protect downstream microservices against denial-of-service bursts and API quota abuse.',
+    skills: ['Node.js/Go/Python', 'Redis', 'Token Bucket Algorithm', 'Sliding Window Counter', 'Docker'],
+    dataset: {
+      name: 'HTTP Request Access Logs (NASA/Synthetic Web Logs)',
+      url: 'https://ita.ee.lbl.gov/html/contrib/NASA-HTTP.html',
+      description: 'Historical multi-million line web access trace capturing timestamped client requests, IPs, and endpoints.'
+    },
+    tech_stack: ['Express/FastAPI', 'Redis', 'Docker Compose', 'Jest/PyTest'],
+    milestones: [
+      { week: 1, title: 'In-Memory Leaky & Token Bucket', deliverables: ['Implement algorithm with concurrency locks', 'Write unit tests validating capacity refills'] },
+      { week: 2, title: 'Redis Distributed State & Lua Scripts', deliverables: ['Write atomic Lua script for Redis sliding window', 'Benchmark 10,000 req/sec throughput'] },
+      { week: 3, title: 'Middleware Integration & HTTP Headers', deliverables: ['Return X-RateLimit-Limit, Remaining, and Retry-After', 'Docker containerization with automated tests'] }
+    ],
+    evaluation_criteria: [
+      'Zero race conditions across multi-instance concurrent requests',
+      'Accurate handling of clock drift and sliding window boundaries',
+      'Clean code architecture and documented API endpoints'
+    ]
+  },
+  {
+    id: 'proj-rag-multimodal-assistant',
+    title: 'Multimodal RAG Technical Documentation Tutor',
+    domain: 'AI/ML Engineer',
+    target_role: 'AI/ML Engineer',
+    difficulty: 'Advanced',
+    problem_statement: 'Construct an end-to-end RAG system capable of parsing technical PDF documents with architectural diagrams, code snippets, and tables, indexing them in a vector database for citation-backed Q&A.',
+    skills: ['Python', 'Gemini API', 'PyTorch', 'Qdrant/Milvus', 'HNSW', 'LangChain/LlamaIndex'],
+    dataset: {
+      name: 'arXiv CS Papers Open Dataset',
+      url: 'https://huggingface.co/datasets/arxiv_dataset',
+      description: 'Over 10,000 open access computer science and ML research papers in PDF and text formats.'
+    },
+    tech_stack: ['Python', 'Gemini 3.8 Flash', 'Qdrant/ChromaDB', 'FastAPI', 'Streamlit/React'],
+    milestones: [
+      { week: 1, title: 'Document Parsing & Table Extraction', deliverables: ['Build PDF chunking pipeline preserving markdown tables', 'Extract image diagrams with captions'] },
+      { week: 2, title: 'Embedding & Hybrid Search Index', deliverables: ['Generate text-embedding vectors', 'Configure HNSW index with BM25 sparse keyword hybrid search'] },
+      { week: 3, title: 'Grounded Query Synthesis & Citations', deliverables: ['Prompt template with citation checks', 'Evaluate answer faithfulness using RAGAS metrics'] }
+    ],
+    evaluation_criteria: [
+      'Faithfulness score > 0.90 on synthetic ground truth queries',
+      'Accurate page number and section citations',
+      'Low query latency (< 1.5 seconds end-to-end)'
+    ]
+  },
+  {
+    id: 'proj-customer-churn-ml',
+    title: 'Telco Customer Churn Predictor & Retention Dashboard',
+    domain: 'Data Scientist',
+    target_role: 'Data Scientist',
+    difficulty: 'Intermediate',
+    problem_statement: 'Develop an end-to-end machine learning pipeline that predicts telecom customer churn, explains model decisions using SHAP values, and identifies top risk drivers for marketing intervention.',
+    skills: ['Python', 'scikit-learn', 'XGBoost', 'Pandas', 'SHAP', 'Streamlit'],
+    dataset: {
+      name: 'Telco Customer Churn Dataset (IBM Open Data)',
+      url: 'https://www.kaggle.com/datasets/blastchar/telco-customer-churn',
+      description: '7,043 customer records with 21 behavioral features including tenure, contract type, and monthly charges.'
+    },
+    tech_stack: ['Python 3.10', 'scikit-learn', 'XGBoost', 'Matplotlib', 'Streamlit'],
+    milestones: [
+      { week: 1, title: 'Exploratory Data Analysis & Feature Engineering', deliverables: ['Inspect missing values, handle categorical encodings', 'Correlate tenure and monthly contracts with churn'] },
+      { week: 2, title: 'Model Training, Cross-Validation & Hyperparameter Tuning', deliverables: ['Train Logistic Regression, Random Forest, and XGBoost', 'Evaluate ROC-AUC, Precision-Recall curve, and F1-score'] },
+      { week: 3, title: 'Explainability & Interactive Risk Dashboard', deliverables: ['Generate SHAP summary plots for feature importance', 'Deploy interactive prediction tool with threshold sliders'] }
+    ],
+    evaluation_criteria: [
+      'ROC-AUC score >= 0.84 on held-out test split',
+      'Clear business cost matrix calculation comparing retention offers vs churn loss',
+      'Explainable individual predictions with SHAP waterfall plots'
+    ]
+  },
+  {
+    id: 'proj-ecommerce-analytics-warehouse',
+    title: 'E-Commerce Analytics Modern Data Stack (dbt + SQL)',
+    domain: 'Data Analyst',
+    target_role: 'Data Analyst',
+    difficulty: 'Beginner',
+    problem_statement: 'Design a dimensional data warehouse schema (Star Schema) and analytical reports analyzing customer acquisition cost, cohort retention, and product category profitability.',
+    skills: ['SQL', 'PostgreSQL/BigQuery', 'dbt (data build tool)', 'Data Modeling', 'Power BI'],
+    dataset: {
+      name: 'Brazilian E-Commerce Public Dataset by Olist',
+      url: 'https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce',
+      description: '100k anonymized real orders from 2016 to 2018 across multiple marketplaces in Brazil.'
+    },
+    tech_stack: ['PostgreSQL', 'dbt Core', 'Metabase/Power BI', 'SQL'],
+    milestones: [
+      { week: 1, title: 'Data Cleaning & Schema Design', deliverables: ['Construct fact_orders and dim_customers, dim_products star schema', 'Enforce foreign key constraints'] },
+      { week: 2, title: 'Analytical SQL Models & Cohort Analysis', deliverables: ['Write monthly cohort retention queries using window functions', 'Calculate Customer Lifetime Value (CLV)'] },
+      { week: 3, title: 'Executive BI Dashboard', deliverables: ['Build interactive dashboard with drilldowns', 'Document actionable marketing recommendations'] }
+    ],
+    evaluation_criteria: [
+      'Clean 3NF staging to star-schema dimensional transformation',
+      'All SQL queries execute with optimal index usage',
+      'Executive-ready visual presentation with clear insights'
+    ]
+  }
+];

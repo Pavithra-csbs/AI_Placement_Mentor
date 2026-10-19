@@ -1,0 +1,73 @@
+{
+  "model_type": "LogisticRegression (Multinomial with L2 regularization)",
+  "vectorizer": "TfidfVectorizer (ngram_range=(1,2), sublinear_tf=True)",
+  "train_samples": 45,
+  "test_samples": 15,
+  "total_dataset_size": 60,
+  "classes": [
+    "Easy (0)",
+    "Medium (1)",
+    "Hard (2)"
+  ],
+  "accuracy": 0.6,
+  "precision_weighted": 0.5817,
+  "recall_weighted": 0.6,
+  "f1_score_weighted": 0.5635,
+  "precision_macro": 0.575,
+  "recall_macro": 0.5833,
+  "f1_score_macro": 0.5493,
+  "confusion_matrix": [
+    [
+      5,
+      0,
+      0
+    ],
+    [
+      2,
+      3,
+      1
+    ],
+    [
+      1,
+      2,
+      1
+    ]
+  ],
+  "classification_report": {
+    "Easy": {
+      "precision": 0.625,
+      "recall": 1.0,
+      "f1-score": 0.7692307692307693,
+      "support": 5
+    },
+    "Medium": {
+      "precision": 0.6,
+      "recall": 0.5,
+      "f1-score": 0.5454545454545454,
+      "support": 6
+    },
+    "Hard": {
+      "precision": 0.5,
+      "recall": 0.25,
+      "f1-score": 0.3333333333333333,
+      "support": 4
+    },
+    "accuracy": 0.6,
+    "macro avg": {
+      "precision": 0.5750000000000001,
+      "recall": 0.5833333333333334,
+      "f1-score": 0.5493395493395493,
+      "support": 15
+    },
+    "weighted avg": {
+      "precision": 0.5816666666666667,
+      "recall": 0.6,
+      "f1-score": 0.5634809634809634,
+      "support": 15
+    }
+  },
+  "artifacts_saved": [
+    "ml_service/models/difficulty_classifier.pkl",
+    "ml_service/models/tfidf_vectorizer.pkl"
+  ]
+}
