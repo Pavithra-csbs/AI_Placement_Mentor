@@ -13,7 +13,11 @@ import {
   ChevronUp, 
   Sparkles, 
   ArrowRight,
-  Compass
+  Compass,
+  Loader2,
+  X,
+  Zap,
+  Target
 } from 'lucide-react';
 
 interface RoadmapViewProps {
@@ -21,7 +25,7 @@ interface RoadmapViewProps {
   onRoleChange: (role: JobRole) => void;
 }
 
-const ROLES: JobRole[] = [
+const DEFAULT_ROLES: JobRole[] = [
   'Software Developer',
   'Data Analyst',
   'Data Scientist',
@@ -34,6 +38,7 @@ export const RoadmapView: React.FC<RoadmapViewProps> = ({
   currentRole,
   onRoleChange,
 }) => {
+  const [availableRoles, setAvailableRoles] = useState<JobRole[]>(DEFAULT_ROLES);
   const [selectedRole, setSelectedRole] = useState<JobRole>(currentRole);
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,22 +49,90 @@ export const RoadmapView: React.FC<RoadmapViewProps> = ({
     p4: false,
   });
 
+  // Generator State
+  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+  const [customRoleInput, setCustomRoleInput] = useState('');
+  const [customLevel, setCustomLevel] = useState('Intermediate (3rd/4th Year)');
+  const [customKeywords, setCustomKeywords] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchRolesList();
+  }, []);
+
   useEffect(() => {
     fetchRoadmap(selectedRole);
   }, [selectedRole]);
+
+  const fetchRolesList = async () => {
+    try {
+      const res = await fetch('/api/roles');
+      const data = await res.json();
+      if (data?.success && Array.isArray(data.roles)) {
+        const titles = data.roles.map((r: any) => r.id || r.title);
+        const merged = Array.from(new Set([...DEFAULT_ROLES, ...titles]));
+        setAvailableRoles(merged);
+      }
+    } catch (e) {
+      console.error('Failed to fetch roles:', e);
+    }
+  };
 
   const fetchRoadmap = async (role: JobRole) => {
     setIsLoading(true);
     try {
       const res = await fetch(`/api/roadmap/${encodeURIComponent(role)}`);
       const data = await res.json();
-      if (data.success && data.roadmap) {
+      if (data?.success && data.roadmap) {
         setRoadmap(data.roadmap);
       }
     } catch (e) {
       console.error('Failed to load roadmap:', e);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGenerateAiRoadmap = async () => {
+    if (!customRoleInput.trim()) {
+      setGenError('Please specify the target career or engineering specialization.');
+      return;
+    }
+
+    setIsGenerating(true);
+    setGenError(null);
+
+    try {
+      const res = await fetch('/api/roadmap/generate-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetRole: customRoleInput.trim(),
+          experienceLevel: customLevel,
+          durationWeeks: 16,
+          focusKeywords: customKeywords.split(',').map(s => s.trim()).filter(Boolean),
+        }),
+      });
+
+      const data = await res.json();
+      if (data?.success && data.roadmap) {
+        const newRoleName = data.roadmap.role_id || customRoleInput.trim();
+        setAvailableRoles(prev => Array.from(new Set([newRoleName, ...prev])));
+        setSelectedRole(newRoleName);
+        onRoleChange(newRoleName);
+        setRoadmap(data.roadmap);
+        setIsGeneratorOpen(false);
+        setCustomRoleInput('');
+        setCustomKeywords('');
+      } else {
+        setGenError('Failed to synthesize custom roadmap. Please try again.');
+      }
+    } catch (e) {
+      console.error('Failed to generate roadmap:', e);
+      setGenError('Network error while generating AI roadmap.');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -72,8 +145,7 @@ export const RoadmapView: React.FC<RoadmapViewProps> = ({
         body: JSON.stringify({ role: selectedRole, weekNumber }),
       });
       const data = await res.json();
-      if (data.success) {
-        // Optimistically update state
+      if (data?.success) {
         const updatedPhases = roadmap.phases.map(p => ({
           ...p,
           milestones: p.milestones.map(m => 
@@ -91,24 +163,24 @@ export const RoadmapView: React.FC<RoadmapViewProps> = ({
     setExpandedPhases(prev => ({ ...prev, [phaseId]: !prev[phaseId] }));
   };
 
-  // Calculate overall completion
-  const allMilestones = roadmap?.phases.flatMap(p => p.milestones) || [];
+  const allMilestones = roadmap?.phases?.flatMap(p => p.milestones || []) || [];
   const completedCount = allMilestones.filter(m => m.is_completed).length;
   const totalCount = allMilestones.length || 1;
   const completionPercentage = Math.round((completedCount / totalCount) * 100);
-
-  // Determine next recommended milestone
   const nextMilestone = allMilestones.find(m => !m.is_completed);
 
   return (
     <div className="space-y-6">
       {/* Header & Role Switcher */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
                 Module 2
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                <Zap className="w-3 h-3 text-emerald-600" /> Real-Time Curriculums
               </span>
               <h1 className="text-xl font-bold text-slate-900">Career Placement Roadmap</h1>
             </div>
@@ -117,25 +189,126 @@ export const RoadmapView: React.FC<RoadmapViewProps> = ({
             </p>
           </div>
 
-          {/* Overall Progress Pill */}
-          <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 px-4 py-2.5 rounded-xl">
-            <div>
-              <div className="text-[11px] font-semibold text-slate-500">Curriculum Mastery</div>
-              <div className="text-sm font-bold text-blue-600">{completedCount} of {totalCount} Completed</div>
+          {/* Actions & Progress Pill */}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setIsGeneratorOpen(prev => !prev)}
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-blue-200" />
+              <span>{isGeneratorOpen ? 'Close Generator' : 'Generate Custom AI Roadmap'}</span>
+            </button>
+
+            <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/80 px-4 py-2 rounded-xl">
+              <div>
+                <div className="text-[10px] font-semibold text-slate-500">Mastery</div>
+                <div className="text-xs font-bold text-blue-600">{completedCount} of {totalCount}</div>
+              </div>
+              <div className="w-14 bg-slate-200 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-blue-600 h-full rounded-full transition-all duration-300"
+                  style={{ width: `${completionPercentage}%` }}
+                />
+              </div>
+              <span className="text-xs font-bold text-slate-700">{completionPercentage}%</span>
             </div>
-            <div className="w-16 bg-slate-200 h-2 rounded-full overflow-hidden">
-              <div 
-                className="bg-blue-600 h-full rounded-full transition-all duration-300"
-                style={{ width: `${completionPercentage}%` }}
-              />
-            </div>
-            <span className="text-xs font-bold text-slate-700">{completionPercentage}%</span>
           </div>
         </div>
 
+        {/* Real-Time Generator Drawer */}
+        {isGeneratorOpen && (
+          <div className="bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/80 rounded-2xl p-5 border border-blue-200 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-blue-600" />
+                <h3 className="text-sm font-bold text-slate-900">Generate Real-Time Placement Career Roadmap</h3>
+              </div>
+              <button
+                onClick={() => setIsGeneratorOpen(false)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600">
+              Create a personalized, 16-week structured milestone path tailored to any specialized role or technology stack.
+            </p>
+
+            {genError && (
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+                {genError}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Target Career Role:</label>
+                <input
+                  type="text"
+                  value={customRoleInput}
+                  onChange={(e) => setCustomRoleInput(e.target.value)}
+                  placeholder="e.g. Full-Stack AI Engineer, SRE, Quant Developer"
+                  className="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Current Candidate Level:</label>
+                <select
+                  value={customLevel}
+                  onChange={(e) => setCustomLevel(e.target.value)}
+                  className="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                >
+                  <option value="Beginner (1st/2nd Year)">Beginner (1st/2nd Year)</option>
+                  <option value="Intermediate (3rd/4th Year)">Intermediate (3rd/4th Year)</option>
+                  <option value="Job Ready / Graduate">Job Ready / Graduate</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">Focus Tooling & Frameworks:</label>
+                <input
+                  type="text"
+                  value={customKeywords}
+                  onChange={(e) => setCustomKeywords(e.target.value)}
+                  placeholder="e.g. Kubernetes, Go, Kafka, Docker, PyTorch"
+                  className="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                onClick={() => setIsGeneratorOpen(false)}
+                className="px-4 py-2 text-xs text-slate-600 hover:text-slate-800 font-semibold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleGenerateAiRoadmap}
+                disabled={isGenerating || !customRoleInput.trim()}
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-50 transition-colors"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Architecting 16-Week Curriculum...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Generate Structured Roadmap</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Role Pills */}
         <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
-          {ROLES.map((role) => (
+          {availableRoles.map((role) => (
             <button
               key={role}
               onClick={() => { setSelectedRole(role); onRoleChange(role); }}
@@ -155,152 +328,159 @@ export const RoadmapView: React.FC<RoadmapViewProps> = ({
       {nextMilestone && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-xs">
+            <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-xs shrink-0">
               <Compass className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-100 px-2 py-0.5 rounded-sm">
-                  Recommended Next Milestone
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">
+                  Recommended Immediate Next Step
                 </span>
-                <span className="text-xs font-semibold text-slate-500">Week {nextMilestone.week_number}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-blue-100 font-bold text-blue-800">
+                  Week {nextMilestone.week_number}
+                </span>
               </div>
-              <h3 className="text-sm font-bold text-slate-900 mt-1">{nextMilestone.title}</h3>
-              <p className="text-xs text-slate-600 mt-0.5 line-clamp-1">{nextMilestone.description}</p>
+              <h3 className="text-sm font-bold text-slate-900 mt-0.5">{nextMilestone.title}</h3>
+              <p className="text-xs text-slate-600 mt-1">{nextMilestone.description}</p>
             </div>
           </div>
+
           <button
             onClick={() => toggleMilestone(nextMilestone.week_number)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap self-end sm:self-center"
           >
-            Mark Complete <ArrowRight className="w-3.5 h-3.5" />
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Mark Complete</span>
           </button>
         </div>
       )}
 
-      {/* Roadmap Phases List */}
+      {/* Loading state */}
       {isLoading ? (
-        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-sm">
-          Loading {selectedRole} roadmap...
+        <div className="p-16 text-center bg-white rounded-3xl border border-slate-200 text-slate-500 text-xs flex flex-col items-center justify-center gap-3">
+          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+          <span className="font-semibold text-slate-700">Loading {selectedRole} Curriculum...</span>
+        </div>
+      ) : !roadmap ? (
+        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-xs">
+          No roadmap found for {selectedRole}. Use the generator above to create one.
         </div>
       ) : (
-        <div className="space-y-4">
-          {roadmap?.phases.map((phase) => {
+        /* Roadmap Phases */
+        <div className="space-y-6">
+          {roadmap.phases.map((phase) => {
             const isExpanded = expandedPhases[phase.phase_id] ?? true;
             const phaseCompleted = phase.milestones.filter(m => m.is_completed).length;
+
             return (
-              <div key={phase.phase_id} className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
-                {/* Phase Header Accordion */}
-                <button
+              <div 
+                key={phase.phase_id}
+                className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden"
+              >
+                {/* Phase Header Accordion Toggle */}
+                <div 
                   onClick={() => togglePhase(phase.phase_id)}
-                  className="w-full px-6 py-4 flex items-center justify-between bg-slate-50/70 hover:bg-slate-100/70 transition-colors border-b border-slate-200/60 text-left cursor-pointer"
+                  className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50/60 transition-colors border-b border-slate-100"
                 >
                   <div className="flex items-center gap-3">
-                    <Layers className="w-5 h-5 text-blue-600" />
+                    <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
+                      <Layers className="w-4 h-4" />
+                    </div>
                     <div>
                       <h2 className="text-sm font-bold text-slate-900">{phase.title}</h2>
-                      <p className="text-xs text-slate-500">{phase.description}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{phase.description}</p>
                     </div>
                   </div>
+
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-600">
-                      {phaseCompleted}/{phase.milestones.length} Done
+                    <span className="text-xs font-semibold text-slate-500">
+                      {phaseCompleted} / {phase.milestones.length} Done
                     </span>
                     {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                   </div>
-                </button>
+                </div>
 
                 {/* Phase Milestones */}
                 {isExpanded && (
-                  <div className="p-6 divide-y divide-slate-100 space-y-6">
-                    {phase.milestones.map((milestone) => (
-                      <div key={milestone.week_number} className="pt-6 first:pt-0">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-3">
-                            {/* Completion Checkmark */}
-                            <button
-                              onClick={() => toggleMilestone(milestone.week_number)}
-                              className="mt-1 transition-transform active:scale-90 cursor-pointer"
-                              title={milestone.is_completed ? 'Mark incomplete' : 'Mark completed'}
-                            >
-                              {milestone.is_completed ? (
-                                <CheckCircle2 className="w-5 h-5 text-emerald-600 fill-emerald-100" />
-                              ) : (
-                                <Circle className="w-5 h-5 text-slate-300 hover:text-blue-500" />
-                              )}
-                            </button>
+                  <div className="p-5 space-y-4 divide-y divide-slate-100">
+                    {phase.milestones.map((m) => (
+                      <div key={m.week_number} className="pt-4 first:pt-0">
+                        <div className="flex items-start gap-4">
+                          {/* Complete Checkbox */}
+                          <button
+                            onClick={() => toggleMilestone(m.week_number)}
+                            className="mt-1 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer shrink-0"
+                          >
+                            {m.is_completed ? (
+                              <CheckCircle2 className="w-5 h-5 text-emerald-600 fill-emerald-50" />
+                            ) : (
+                              <Circle className="w-5 h-5 text-slate-300 hover:text-blue-500" />
+                            )}
+                          </button>
 
-                            <div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
-                                  Week {milestone.week_number}
+                          {/* Milestone Details */}
+                          <div className="flex-1 space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600">
+                                Week {m.week_number}
+                              </span>
+                              <h3 className={`text-sm font-bold ${m.is_completed ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+                                {m.title}
+                              </h3>
+                            </div>
+
+                            <p className="text-xs text-slate-600 leading-relaxed">
+                              {m.description}
+                            </p>
+
+                            {/* Topics & Prereqs */}
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              {(m.topics || []).map((t, tIdx) => (
+                                <span key={tIdx} className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200/50">
+                                  {t}
                                 </span>
-                                <h3 className={`text-sm font-bold ${
-                                  milestone.is_completed ? 'line-through text-slate-400' : 'text-slate-900'
-                                }`}>
-                                  {milestone.title}
-                                </h3>
-                              </div>
-                              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                                {milestone.description}
-                              </p>
+                              ))}
+                            </div>
 
-                              {/* Topics & Prerequisites */}
-                              <div className="mt-3 flex flex-wrap items-center gap-2">
-                                <span className="text-[11px] font-semibold text-slate-400">Core Topics:</span>
-                                {milestone.topics.map((t, idx) => (
-                                  <span key={idx} className="text-[11px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-                                    {t}
-                                  </span>
-                                ))}
-                              </div>
-
-                              {milestone.prerequisites.length > 0 && (
-                                <div className="mt-2 flex flex-wrap items-center gap-2">
-                                  <span className="text-[11px] font-semibold text-amber-700">Prerequisites:</span>
-                                  {milestone.prerequisites.map((p, idx) => (
-                                    <span key={idx} className="text-[11px] px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200">
-                                      {p}
-                                    </span>
-                                  ))}
+                            {/* Practical Deliverable */}
+                            {m.practical_milestone && (
+                              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 text-xs text-slate-700 flex items-start gap-2">
+                                <Code className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                                <div>
+                                  <span className="font-bold text-slate-900">Hands-on Milestone: </span>
+                                  {m.practical_milestone}
                                 </div>
-                              )}
+                              </div>
+                            )}
 
-                              {/* Curated Resources */}
-                              <div className="mt-4">
-                                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
-                                  Curated Learning Resources & Documentation
+                            {/* Curated Resources */}
+                            {Array.isArray(m.curated_resources) && m.curated_resources.length > 0 && (
+                              <div className="pt-1">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                                  Curated Learning Resources:
                                 </span>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                  {milestone.curated_resources.map((res, idx) => (
+                                <div className="flex flex-wrap gap-2">
+                                  {m.curated_resources.map((res, rIdx) => (
                                     <a
-                                      key={idx}
+                                      key={rIdx}
                                       href={res.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="p-2.5 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-blue-50/40 hover:border-blue-300 transition-all flex items-center justify-between text-xs group"
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-blue-400 text-xs text-slate-700 hover:text-blue-700 font-medium transition-all shadow-2xs"
                                     >
-                                      <div className="flex items-center gap-2">
-                                        <BookOpen className="w-3.5 h-3.5 text-blue-600" />
-                                        <span className="font-semibold text-slate-800 group-hover:text-blue-700 line-clamp-1">
-                                          {res.title}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center gap-1.5 ml-2">
-                                        <span className="text-[10px] text-slate-400">{res.estimated_time}</span>
-                                        <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-blue-600" />
-                                      </div>
+                                      {res.type === 'Course' || res.type === 'Interactive' ? (
+                                        <Video className="w-3.5 h-3.5 text-blue-600" />
+                                      ) : (
+                                        <BookOpen className="w-3.5 h-3.5 text-slate-500" />
+                                      )}
+                                      <span>{res.title}</span>
+                                      <span className="text-[10px] text-slate-400">({res.estimated_time})</span>
+                                      <ExternalLink className="w-3 h-3 text-slate-400 ml-0.5" />
                                     </a>
                                   ))}
                                 </div>
                               </div>
-
-                              {/* Practical Milestone */}
-                              <div className="mt-3 p-3 rounded-xl bg-blue-50/60 border border-blue-200/60 text-xs text-blue-900">
-                                <span className="font-bold">Weekly Deliverable Target: </span>
-                                {milestone.practical_milestone}
-                              </div>
-                            </div>
+                            )}
                           </div>
                         </div>
                       </div>

@@ -20,7 +20,9 @@ import {
   ProjectRecommendation,
   ResumeData,
   AnalyticsSummary,
+  UserCredential,
 } from '../types/index.ts';
+import { hashPassword } from './authHelper.ts';
 
 import {
   SEED_ROLES,
@@ -34,6 +36,7 @@ import {
 
 export interface DatabaseSchema {
   users: UserProfile[];
+  credentials: UserCredential[];
   roles: RoleInfo[];
   roadmaps: Record<string, Roadmap>;
   problems: CodingProblem[];
@@ -158,8 +161,19 @@ class DatabaseManager {
     }
 
     if (!fs.existsSync(DB_FILE)) {
+      const defaultCred = hashPassword('Password123!');
       const initialData: DatabaseSchema = {
         users: [DEFAULT_USER],
+        credentials: [
+          {
+            userId: DEFAULT_USER.id,
+            email: DEFAULT_USER.email,
+            passwordHash: defaultCred.hash,
+            salt: defaultCred.salt,
+            securityQuestion: 'What was your first programming language?',
+            securityAnswer: 'Java',
+          }
+        ],
         roles: SEED_ROLES,
         roadmaps: SEED_ROADMAPS,
         problems: SEED_CODING_PROBLEMS,
@@ -188,6 +202,19 @@ class DatabaseManager {
       const raw = fs.readFileSync(DB_FILE, 'utf-8');
       const data = JSON.parse(raw) as DatabaseSchema;
       // Ensure seed data updates are merged if new items added
+      if (!data.credentials) {
+        const defaultCred = hashPassword('Password123!');
+        data.credentials = [
+          {
+            userId: DEFAULT_USER.id,
+            email: DEFAULT_USER.email,
+            passwordHash: defaultCred.hash,
+            salt: defaultCred.salt,
+            securityQuestion: 'What was your first programming language?',
+            securityAnswer: 'Java',
+          }
+        ];
+      }
       if (!data.roles || data.roles.length === 0) data.roles = SEED_ROLES;
       if (!data.problems || data.problems.length === 0) data.problems = SEED_CODING_PROBLEMS;
       if (!data.posters || data.posters.length === 0) data.posters = SEED_POSTERS;
@@ -199,8 +226,19 @@ class DatabaseManager {
       return data;
     } catch (err) {
       console.error('Error reading database file, recreating initial state:', err);
+      const defaultCred = hashPassword('Password123!');
       const fallback: DatabaseSchema = {
         users: [DEFAULT_USER],
+        credentials: [
+          {
+            userId: DEFAULT_USER.id,
+            email: DEFAULT_USER.email,
+            passwordHash: defaultCred.hash,
+            salt: defaultCred.salt,
+            securityQuestion: 'What was your first programming language?',
+            securityAnswer: 'Java',
+          }
+        ],
         roles: SEED_ROLES,
         roadmaps: SEED_ROADMAPS,
         problems: SEED_CODING_PROBLEMS,
@@ -317,6 +355,89 @@ class DatabaseManager {
     }
   }
 
+  // --- Credentials & Authentication ---
+  public findUserByEmail(email: string): UserProfile | undefined {
+    const clean = (email || '').trim().toLowerCase();
+    return this.readDb().users.find(u => u.email.toLowerCase() === clean);
+  }
+
+  public getCredentialByEmail(email: string): UserCredential | undefined {
+    const clean = (email || '').trim().toLowerCase();
+    const creds = this.readDb().credentials || [];
+    return creds.find(c => c.email.toLowerCase() === clean);
+  }
+
+  public getCredentialByUserId(userId: string): UserCredential | undefined {
+    const creds = this.readDb().credentials || [];
+    return creds.find(c => c.userId === userId);
+  }
+
+  public saveCredential(cred: UserCredential): void {
+    const db = this.readDb();
+    if (!db.credentials) db.credentials = [];
+    const idx = db.credentials.findIndex(c => c.email.toLowerCase() === cred.email.toLowerCase() || c.userId === cred.userId);
+    if (idx >= 0) {
+      db.credentials[idx] = { ...db.credentials[idx], ...cred };
+    } else {
+      db.credentials.push(cred);
+    }
+    this.writeDb(db);
+  }
+
+  public updatePassword(email: string, passwordHash: string, salt: string): boolean {
+    const db = this.readDb();
+    if (!db.credentials) db.credentials = [];
+    const idx = db.credentials.findIndex(c => c.email.toLowerCase() === email.trim().toLowerCase());
+    if (idx >= 0) {
+      db.credentials[idx].passwordHash = passwordHash;
+      db.credentials[idx].salt = salt;
+      db.credentials[idx].resetCode = undefined;
+      db.credentials[idx].resetCodeExpires = undefined;
+      this.writeDb(db);
+      return true;
+    }
+    return false;
+  }
+
+  public setResetCode(email: string, resetCode: string, ttlMinutes = 15): boolean {
+    const db = this.readDb();
+    if (!db.credentials) db.credentials = [];
+    const idx = db.credentials.findIndex(c => c.email.toLowerCase() === email.trim().toLowerCase());
+    if (idx >= 0) {
+      db.credentials[idx].resetCode = resetCode;
+      db.credentials[idx].resetCodeExpires = Date.now() + ttlMinutes * 60 * 1000;
+      this.writeDb(db);
+      return true;
+    }
+    return false;
+  }
+
+  public verifyResetCode(email: string, code: string): boolean {
+    const db = this.readDb();
+    if (!db.credentials) return false;
+    const cred = db.credentials.find(c => c.email.toLowerCase() === email.trim().toLowerCase());
+    if (!cred || !cred.resetCode || !cred.resetCodeExpires) return false;
+    if (Date.now() > cred.resetCodeExpires) return false;
+    return cred.resetCode.trim() === code.trim();
+  }
+
+  public clearResetCode(email: string): void {
+    const db = this.readDb();
+    if (!db.credentials) return;
+    const idx = db.credentials.findIndex(c => c.email.toLowerCase() === email.trim().toLowerCase());
+    if (idx >= 0) {
+      db.credentials[idx].resetCode = undefined;
+      db.credentials[idx].resetCodeExpires = undefined;
+      this.writeDb(db);
+    }
+  }
+
+  public logoutUser(): void {
+    const db = this.readDb();
+    db.active_user_id = '';
+    this.writeDb(db);
+  }
+
   // --- Roadmaps ---
   public getRoadmap(role: string): Roadmap {
     const db = this.readDb();
@@ -359,6 +480,14 @@ class DatabaseManager {
     return this.readDb().roles;
   }
 
+  public addRole(role: RoleInfo): void {
+    const db = this.readDb();
+    if (!db.roles.some(r => r.id === role.id || r.title.toLowerCase() === role.title.toLowerCase())) {
+      db.roles.push(role);
+      this.writeDb(db);
+    }
+  }
+
   // --- Coding Problems & Attempts ---
   public getProblems(topic?: string, difficulty?: string): CodingProblem[] {
     const db = this.readDb();
@@ -374,6 +503,14 @@ class DatabaseManager {
 
   public getProblemBySlug(slug: string): CodingProblem | undefined {
     return this.readDb().problems.find(p => p.slug === slug || p.id === slug);
+  }
+
+  public addProblem(problem: CodingProblem): CodingProblem {
+    const db = this.readDb();
+    // Prepend so newly generated problems appear at the top
+    db.problems.unshift(problem);
+    this.writeDb(db);
+    return problem;
   }
 
   public saveCodingAttempt(attempt: Omit<CodingAttempt, 'id' | 'created_at'>): CodingAttempt {
@@ -407,9 +544,22 @@ class DatabaseManager {
     return db.posters[0] || SEED_POSTERS[0];
   }
 
+  public addPoster(poster: DailyTechPoster): DailyTechPoster {
+    const db = this.readDb();
+    db.posters.unshift(poster);
+    this.writeDb(db);
+    return poster;
+  }
+
   public getQuizForPoster(posterId: string): QuizQuestion[] {
     const db = this.readDb();
     return db.quizzes.filter(q => q.poster_id === posterId);
+  }
+
+  public addQuizzes(newQuizzes: QuizQuestion[]): void {
+    const db = this.readDb();
+    db.quizzes.push(...newQuizzes);
+    this.writeDb(db);
   }
 
   public saveQuizAttempt(attempt: Omit<QuizAttempt, 'id' | 'created_at'>): QuizAttempt {
@@ -454,6 +604,13 @@ class DatabaseManager {
     return this.readDb().scenarios.find(s => s.id === id);
   }
 
+  public addScenario(scenario: ScenarioInterview): ScenarioInterview {
+    const db = this.readDb();
+    db.scenarios.unshift(scenario);
+    this.writeDb(db);
+    return scenario;
+  }
+
   public saveScenarioAttempt(attempt: Omit<ScenarioAttempt, 'id' | 'created_at'>): ScenarioAttempt {
     const db = this.readDb();
     const record: ScenarioAttempt = {
@@ -478,6 +635,19 @@ class DatabaseManager {
       return db.projects.filter(p => p.target_role.toLowerCase() === role.toLowerCase());
     }
     return db.projects;
+  }
+
+  public addProject(project: ProjectRecommendation): ProjectRecommendation {
+    const db = this.readDb();
+    db.projects.unshift(project);
+    this.writeDb(db);
+    return project;
+  }
+
+  public saveRoadmap(role: string, roadmap: Roadmap): void {
+    const db = this.readDb();
+    db.roadmaps[role] = roadmap;
+    this.writeDb(db);
   }
 
   // --- Resumes ---

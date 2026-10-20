@@ -12,7 +12,8 @@ import {
   Sparkles, 
   ShieldCheck,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Zap
 } from 'lucide-react';
 
 interface DailyQuizViewProps {
@@ -35,8 +36,10 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
   const [submittedAttempt, setSubmittedAttempt] = useState<QuizAttempt | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [pastAttempts, setPastAttempts] = useState<QuizAttempt[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPostersAndAttempts();
@@ -51,10 +54,10 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
   useEffect(() => {
     if (selectedPosterId) {
       fetchQuestions(selectedPosterId);
-      // Reset active form on poster switch
       setSelectedAnswers({});
       setSubmittedAttempt(null);
       setErrorMessage(null);
+      setValidationError(null);
     }
   }, [selectedPosterId]);
 
@@ -62,7 +65,7 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
     try {
       const pRes = await fetch('/api/posters');
       const pData = await pRes.json();
-      if (pData.success && Array.isArray(pData.posters) && pData.posters.length > 0) {
+      if (pData?.success && Array.isArray(pData.posters) && pData.posters.length > 0) {
         setPosters(pData.posters);
         if (!selectedPosterId) {
           setSelectedPosterId(pData.posters[0].id);
@@ -71,24 +74,25 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
 
       const aRes = await fetch('/api/quiz/attempts');
       const aData = await aRes.json();
-      if (aData.success && Array.isArray(aData.attempts)) {
+      if (aData?.success && Array.isArray(aData.attempts)) {
         setPastAttempts(aData.attempts);
       }
     } catch (e: any) {
       console.error('Failed to fetch posters/attempts:', e);
-      setErrorMessage('Could not load quiz questions. Please check your network connection.');
+      setErrorMessage('Could not load quiz archive. Showing active questions.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const fetchQuestions = async (posterId: string) => {
+    if (!posterId) return;
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      const res = await fetch(`/api/quiz/${posterId}`);
+      const res = await fetch(`/api/quiz/${encodeURIComponent(posterId)}`);
       const data = await res.json();
-      if (data.success && Array.isArray(data.questions)) {
+      if (data?.success && Array.isArray(data.questions)) {
         setQuestions(data.questions);
       } else {
         setQuestions([]);
@@ -102,8 +106,42 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
     }
   };
 
+  const handleGenerateAiQuiz = async () => {
+    const poster = posters.find(p => p.id === selectedPosterId);
+    setIsAiGenerating(true);
+    setErrorMessage(null);
+    setValidationError(null);
+
+    try {
+      const res = await fetch('/api/quiz/generate-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          posterId: selectedPosterId || 'poster-custom',
+          topic: poster?.title || 'System Design & Computer Science Fundamentals',
+          count: 4,
+        }),
+      });
+
+      const data = await res.json();
+      if (data?.success && Array.isArray(data.questions) && data.questions.length > 0) {
+        setQuestions(data.questions);
+        setSelectedAnswers({});
+        setSubmittedAttempt(null);
+      } else {
+        setErrorMessage('Could not generate AI questions. Please try again.');
+      }
+    } catch (e) {
+      console.error('AI quiz generation error:', e);
+      setErrorMessage('Failed to generate real-time questions.');
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
+
   const handleSelectOption = (questionId: string, optionIdx: number) => {
     if (submittedAttempt) return; // Locked once submitted
+    setValidationError(null);
     setSelectedAnswers(prev => ({ ...prev, [questionId]: optionIdx }));
   };
 
@@ -111,10 +149,11 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
     if (questions.length === 0) return;
 
     if (Object.keys(selectedAnswers).length < questions.length) {
-      alert('Please answer all questions before submitting.');
+      setValidationError(`Please answer all ${questions.length} questions before submitting.`);
       return;
     }
 
+    setValidationError(null);
     setIsSubmitting(true);
     try {
       const formattedAnswers = Object.entries(selectedAnswers).map(([qId, sIdx]) => ({
@@ -133,14 +172,16 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
       });
 
       const data = await res.json();
-      if (data.success && data.attempt) {
+      if (data?.success && data.attempt) {
         setSubmittedAttempt(data.attempt);
         setPastAttempts(prev => [data.attempt, ...prev]);
         if (onStreakUpdated) onStreakUpdated();
+      } else {
+        setValidationError('Failed to record attempt. Please try submitting again.');
       }
     } catch (e) {
       console.error('Submit quiz error:', e);
-      alert('Failed to submit quiz attempt. Please try again.');
+      setValidationError('Failed to submit quiz attempt. Please check your network connection.');
     } finally {
       setIsSubmitting(false);
     }
@@ -157,37 +198,64 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
               Module 5
             </span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 flex items-center gap-1">
+              <Zap className="w-3 h-3 text-blue-600" /> Real-Time Engine
+            </span>
             <h1 className="text-xl font-bold text-slate-900">Daily Concept Verification Quiz</h1>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Answer 3-5 technical questions, review deep distractor explanations, and maintain your placement streak.
+            Answer technical questions with real-time distractor explanations and maintain your placement streak.
           </p>
         </div>
 
-        {/* Poster Selector */}
-        {posters.length > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">Concept:</span>
+        {/* Action Buttons & Concept Selector */}
+        <div className="flex flex-wrap items-center gap-2">
+          {posters.length > 0 && (
             <select
               value={selectedPosterId}
               onChange={(e) => setSelectedPosterId(e.target.value)}
-              className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 max-w-[200px] truncate"
             >
               {posters.map(p => (
                 <option key={p.id} value={p.id}>
-                  {p.title ? p.title.split(':')[0] : 'Concept'} ({p.date || 'Today'})
+                  {p?.title ? p.title.split(':')[0] : 'Concept'} ({p?.date || 'Today'})
                 </option>
               ))}
             </select>
-          </div>
-        )}
+          )}
+
+          <button
+            onClick={handleGenerateAiQuiz}
+            disabled={isAiGenerating || isLoading}
+            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+          >
+            {isAiGenerating ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3.5 h-3.5 text-blue-200" />
+                <span>Generate Fresh AI Quiz</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Error alert if any */}
+      {/* Error / Alert banners */}
       {errorMessage && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {validationError && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-          <span>{errorMessage}</span>
+          <span>{validationError}</span>
         </div>
       )}
 
@@ -195,18 +263,18 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
       {currentPoster && (
         <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-200/70 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Concept Context</span>
+              <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Active Concept</span>
               <h2 className="text-sm font-bold text-slate-900">{currentPoster.title}</h2>
             </div>
           </div>
           {onNavigateToPoster && (
             <button
               onClick={() => onNavigateToPoster(currentPoster.id)}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer shrink-0 ml-2"
             >
               Read Poster First <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -217,9 +285,9 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
       {/* Score Result Card (when submitted) */}
       {submittedAttempt && (
         <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-blue-50 border border-emerald-200 text-slate-900 shadow-xs space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shrink-0">
                 <Award className="w-6 h-6" />
               </div>
               <div>
@@ -230,13 +298,13 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
               </div>
             </div>
 
-            {/* Streak Badge with anti-double-counting explanation */}
-            <div className="p-3 rounded-xl bg-white/80 border border-emerald-200 text-right">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 justify-end">
+            {/* Streak Badge */}
+            <div className="p-3 rounded-xl bg-white/80 border border-emerald-200 text-left sm:text-right">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 sm:justify-end">
                 <Flame className="w-4 h-4 fill-amber-500 text-amber-500" />
                 <span>Streak Protected</span>
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">Anti-double counting verified for today ({submittedAttempt.date || 'Today'})</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">Verified placement streak calculation ({submittedAttempt.date || 'Today'})</p>
             </div>
           </div>
 
@@ -247,27 +315,42 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
       )}
 
       {/* Loading state */}
-      {isLoading ? (
-        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-xs flex items-center justify-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-          <span>Loading concept verification questions...</span>
+      {isLoading || isAiGenerating ? (
+        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-xs flex flex-col items-center justify-center gap-3">
+          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+          <span className="font-semibold text-slate-700">
+            {isAiGenerating ? 'Generating real-time interview questions with Gemini AI...' : 'Loading concept verification questions...'}
+          </span>
+          <span className="text-slate-400 text-[11px]">Crafting technical scenarios, distractor traps, and in-depth explanations</span>
         </div>
       ) : questions.length === 0 ? (
-        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-xs">
-          No questions available for this concept yet. Please select another concept from the archive above.
+        <div className="p-10 text-center bg-white rounded-2xl border border-slate-200 text-slate-600 text-xs space-y-4">
+          <HelpCircle className="w-10 h-10 text-slate-300 mx-auto" />
+          <div>
+            <h3 className="text-sm font-bold text-slate-800">No questions found for this concept</h3>
+            <p className="text-slate-400 text-xs mt-1">Generate a fresh set of real-time questions customized for this topic with one click.</p>
+          </div>
+          <button
+            onClick={handleGenerateAiQuiz}
+            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 inline-flex items-center gap-2 cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4 text-blue-200" />
+            <span>Generate Real-Time AI Quiz</span>
+          </button>
         </div>
       ) : (
         /* Questions List */
         <div className="space-y-6">
           {questions.map((q, qIndex) => {
-            const selectedOption = selectedAnswers[q.id];
-            const isAnswered = selectedOption !== undefined;
-            const userResult = submittedAttempt?.answers?.find(a => a.question_id === q.id);
+            if (!q) return null;
+            const qId = q.id || `q-${qIndex}`;
+            const selectedOption = selectedAnswers[qId];
+            const userResult = submittedAttempt?.answers?.find(a => a.question_id === qId);
             const isCorrect = userResult ? Boolean(userResult.is_correct) : false;
 
             return (
               <div 
-                key={q.id || qIndex}
+                key={qId}
                 className={`p-6 rounded-2xl border transition-all ${
                   submittedAttempt 
                     ? isCorrect 
@@ -325,7 +408,7 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
                     return (
                       <div
                         key={oIdx}
-                        onClick={() => handleSelectOption(q.id, oIdx)}
+                        onClick={() => handleSelectOption(qId, oIdx)}
                         className={`p-3.5 rounded-xl border text-xs transition-all flex items-start gap-3 cursor-pointer ${optionStyle}`}
                       >
                         <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
@@ -354,11 +437,11 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
                       </div>
                     )}
 
-                    {/* Distractor Explanation (if user got it wrong or wants deeper knowledge) */}
+                    {/* Distractor Explanation */}
                     {Array.isArray(q.explanation_distractors) && q.explanation_distractors.length > 0 && (
                       <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
                         <span className="font-bold block mb-1 text-slate-900">
-                          Why the other choices are incorrect (Interview Distractors):
+                          Why the other choices are incorrect (Interview Distractors & Traps):
                         </span>
                         <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600">
                           {q.explanation_distractors.map((d, dIdx) => (
@@ -377,31 +460,43 @@ export const DailyQuizView: React.FC<DailyQuizViewProps> = ({
 
       {/* Submit / Retake Action Button */}
       {questions.length > 0 && (
-        <div className="flex items-center justify-between pt-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-200/60">
           <div className="text-xs text-slate-500">
             {Object.keys(selectedAnswers).length} of {questions.length} questions answered
           </div>
 
-          {submittedAttempt ? (
-            <button
-              onClick={() => {
-                setSubmittedAttempt(null);
-                setSelectedAnswers({});
-              }}
-              className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
-            >
-              <RotateCcw className="w-4 h-4" /> Retake Concept Quiz
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmitQuiz}
-              disabled={isSubmitting || Object.keys(selectedAnswers).length < questions.length}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/25 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
-            >
-              {isSubmitting ? 'Evaluating...' : 'Submit Answers & Record Streak'}
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {submittedAttempt ? (
+              <button
+                onClick={() => {
+                  setSubmittedAttempt(null);
+                  setSelectedAnswers({});
+                  setValidationError(null);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" /> Retake Concept Quiz
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmitQuiz}
+                disabled={isSubmitting || Object.keys(selectedAnswers).length < questions.length}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/25 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Evaluating Answers...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Submit Answers & Record Streak</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       )}
 

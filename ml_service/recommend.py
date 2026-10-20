@@ -10,8 +10,29 @@ import sys
 import os
 import json
 import pickle
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+import math
+from collections import Counter
+
+try:
+    import numpy as np
+    from sklearn.metrics.pairwise import cosine_similarity
+    HAS_SKLEARN = True
+except ImportError:
+    HAS_SKLEARN = False
+    np = None
+
+def pure_python_cosine(text1, text2):
+    words1 = [w.strip(".,;:!?()[]{}'\"").lower() for w in text1.split() if w.strip(".,;:!?()[]{}'\"")]
+    words2 = [w.strip(".,;:!?()[]{}'\"").lower() for w in text2.split() if w.strip(".,;:!?()[]{}'\"")]
+    c1 = Counter(words1)
+    c2 = Counter(words2)
+    common = set(c1.keys()) & set(c2.keys())
+    dot = sum(c1[w] * c2[w] for w in common)
+    norm1 = math.sqrt(sum(v * v for v in c1.values()))
+    norm2 = math.sqrt(sum(v * v for v in c2.values()))
+    if norm1 == 0 or norm2 == 0:
+        return 0.0
+    return dot / (norm1 * norm2)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODELS_DIR = os.path.join(BASE_DIR, "models")
@@ -88,22 +109,25 @@ def recommend(student_profile, items):
     if not items:
         return {"items": [], "student_difficulty": target_diff, "predicted_difficulty": predicted_difficulty}
 
-    if vectorizer:
-        item_docs = []
-        for item in items:
-            it_skills = " ".join(item.get("skills", []))
-            it_text = f"{item.get('title', '')} {item.get('domain', '')} {it_skills} {item.get('description', '')}"
-            item_docs.append(it_text)
+    if vectorizer and HAS_SKLEARN:
+        try:
+            item_docs = []
+            for item in items:
+                it_skills = " ".join(item.get("skills", []))
+                it_text = f"{item.get('title', '')} {item.get('domain', '')} {it_skills} {item.get('description', '')}"
+                item_docs.append(it_text)
 
-        all_docs = [student_doc] + item_docs
-        tfidf_matrix = vectorizer.transform(all_docs)
+            all_docs = [student_doc] + item_docs
+            tfidf_matrix = vectorizer.transform(all_docs)
 
-        student_vector = tfidf_matrix[0:1]
-        item_vectors = tfidf_matrix[1:]
+            student_vector = tfidf_matrix[0:1]
+            item_vectors = tfidf_matrix[1:]
 
-        cosine_sims = cosine_similarity(student_vector, item_vectors)[0]
+            cosine_sims = cosine_similarity(student_vector, item_vectors)[0]
+        except Exception:
+            cosine_sims = [pure_python_cosine(student_doc, f"{item.get('title', '')} {item.get('domain', '')} {' '.join(item.get('skills', []))} {item.get('description', '')}") for item in items]
     else:
-        cosine_sims = [0.5] * len(items)
+        cosine_sims = [pure_python_cosine(student_doc, f"{item.get('title', '')} {item.get('domain', '')} {' '.join(item.get('skills', []))} {item.get('description', '')}") for item in items]
 
     diff_norm = {
         "easy": 0, "beginner": 0,

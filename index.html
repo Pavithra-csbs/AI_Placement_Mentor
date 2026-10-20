@@ -19,6 +19,11 @@
           event.preventDefault();
         }
       });
+      window.addEventListener('error', function(event) {
+        if (event.message && event.message.includes('WebSocket')) {
+          event.preventDefault();
+        }
+      });
     </script>
   </head>
   <body>

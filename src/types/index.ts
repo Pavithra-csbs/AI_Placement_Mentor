@@ -8,9 +8,10 @@ export type JobRole =
   | 'Data Scientist'
   | 'AI/ML Engineer'
   | 'Cybersecurity Analyst'
-  | 'Cloud Engineer';
+  | 'Cloud Engineer'
+  | (string & {});
 
-export type ExperienceLevel = 'Beginner (1st/2nd Year)' | 'Intermediate (3rd/4th Year)' | 'Job Ready / Graduate';
+export type ExperienceLevel = 'Beginner (1st/2nd Year)' | 'Intermediate (3rd/4th Year)' | 'Job Ready / Graduate' | (string & {});
 
 export interface UserProfile {
   id: string;
@@ -26,6 +27,19 @@ export interface UserProfile {
   created_at: string;
   updated_at: string;
 }
+
+export interface UserCredential {
+  userId: string;
+  email: string;
+  passwordHash: string;
+  salt: string;
+  securityQuestion?: string;
+  securityAnswer?: string;
+  resetCode?: string;
+  resetCodeExpires?: number;
+}
+
+export type AuthMode = 'login' | 'register' | 'forgot_password';
 
 export interface RoleInfo {
   id: JobRole;

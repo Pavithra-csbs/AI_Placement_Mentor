@@ -181,33 +181,41 @@ export default function App() {
 
           {/* Module Views */}
           {activeTab === 'dashboard' && (
-            <DashboardView
-              user={user}
-              analytics={analytics}
-              todayPoster={todayPoster}
-              onNavigate={setActiveTab}
-              onOpenOnboarding={() => setIsOnboardingOpen(true)}
-            />
+            <ErrorBoundary fallbackTitle="Dashboard Unavailable" onReset={fetchAnalytics}>
+              <DashboardView
+                user={user}
+                analytics={analytics}
+                todayPoster={todayPoster}
+                onNavigate={setActiveTab}
+                onOpenOnboarding={() => setIsOnboardingOpen(true)}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'roadmap' && (
-            <RoadmapView
-              currentRole={user.target_role}
-              onRoleChange={handleRoleChangeFromRoadmap}
-            />
+            <ErrorBoundary fallbackTitle="Roadmap Unavailable">
+              <RoadmapView
+                currentRole={user.target_role}
+                onRoleChange={handleRoleChangeFromRoadmap}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'coding' && (
-            <CodingCoachView
-              user={user}
-              onAttemptSaved={fetchAnalytics}
-            />
+            <ErrorBoundary fallbackTitle="Coding Coach Unavailable" onReset={fetchAnalytics}>
+              <CodingCoachView
+                user={user}
+                onAttemptSaved={fetchAnalytics}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'poster' && (
-            <DailyPosterView
-              onTakeQuiz={handleTakeQuizForPoster}
-            />
+            <ErrorBoundary fallbackTitle="Technical Poster Unavailable">
+              <DailyPosterView
+                onTakeQuiz={handleTakeQuizForPoster}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'quiz' && (
@@ -230,36 +238,46 @@ export default function App() {
           )}
 
           {activeTab === 'interview' && (
-            <ScenarioInterviewView
-              user={user}
-              onAttemptSaved={fetchAnalytics}
-            />
+            <ErrorBoundary fallbackTitle="Scenario Interview Unavailable" onReset={fetchAnalytics}>
+              <ScenarioInterviewView
+                user={user}
+                onAttemptSaved={fetchAnalytics}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'projects' && (
-            <ProjectCatalogView
-              user={user}
-            />
+            <ErrorBoundary fallbackTitle="Project Recommendations Catalog Unavailable">
+              <ProjectCatalogView
+                user={user}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'resume' && (
-            <ResumeBuilderView
-              user={user}
-            />
+            <ErrorBoundary fallbackTitle="Resume Builder Unavailable">
+              <ResumeBuilderView
+                user={user}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'analytics' && (
-            <AnalyticsView
-              user={user}
-              analytics={analytics}
-              onNavigate={setActiveTab}
-            />
+            <ErrorBoundary fallbackTitle="Analytics Dashboard Unavailable" onReset={fetchAnalytics}>
+              <AnalyticsView
+                user={user}
+                analytics={analytics}
+                onNavigate={setActiveTab}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'ml-engine' && (
-            <MLEngineView
-              user={user}
-            />
+            <ErrorBoundary fallbackTitle="ML Recommendation Engine Unavailable">
+              <MLEngineView
+                user={user}
+              />
+            </ErrorBoundary>
           )}
         </main>
       </div>

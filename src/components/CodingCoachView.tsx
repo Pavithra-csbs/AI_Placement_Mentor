@@ -63,6 +63,51 @@ export const CodingCoachView: React.FC<CodingCoachViewProps> = ({
   const [aiTutorMessage, setAiTutorMessage] = useState<string | null>(null);
   const [studentQuestion, setStudentQuestion] = useState('');
 
+  // Real-Time Problem Generator State
+  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+  const [genTopic, setGenTopic] = useState('arrays');
+  const [genDifficulty, setGenDifficulty] = useState('Medium');
+  const [genCompany, setGenCompany] = useState('Google');
+  const [genConcept, setGenConcept] = useState('Sliding Window & Hash Maps');
+  const [isGeneratingProblem, setIsGeneratingProblem] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+
+  const handleGenerateProblem = async () => {
+    setIsGeneratingProblem(true);
+    setGenError(null);
+    try {
+      const res = await fetch('/api/coding/generate-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: genTopic,
+          difficulty: genDifficulty,
+          company: genCompany,
+          concept: genConcept,
+        }),
+      });
+      const data = await res.json();
+      if (data?.success && data.problem) {
+        setProblems(prev => [data.problem, ...prev]);
+        setSelectedProblem(data.problem);
+        const starter = data.problem.starter_code[language] || data.problem.starter_code.python || '';
+        setCode(starter);
+        setRevealedHintLevel(0);
+        setActiveHintContent(null);
+        setTestResult(null);
+        setAiTutorMessage(null);
+        setIsGeneratorOpen(false);
+      } else {
+        setGenError('Failed to generate challenge. Please try again.');
+      }
+    } catch (e) {
+      console.error(e);
+      setGenError('Network error while generating challenge.');
+    } finally {
+      setIsGeneratingProblem(false);
+    }
+  };
+
   useEffect(() => {
     fetchProblems();
   }, [topicFilter, difficultyFilter]);
@@ -206,7 +251,7 @@ export const CodingCoachView: React.FC<CodingCoachViewProps> = ({
           </p>
         </div>
 
-        {/* Search & Topic Filters */}
+        {/* Search & Action Filters */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -218,8 +263,130 @@ export const CodingCoachView: React.FC<CodingCoachViewProps> = ({
               className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
+          <button
+            onClick={() => setIsGeneratorOpen(prev => !prev)}
+            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-blue-200" />
+            <span>{isGeneratorOpen ? 'Close Generator' : 'Generate Real-Time Challenge'}</span>
+          </button>
         </div>
       </div>
+
+      {/* Real-Time Problem Generator Panel */}
+      {isGeneratorOpen && (
+        <div className="bg-gradient-to-br from-blue-50/80 via-white to-indigo-50/80 rounded-2xl p-6 border border-blue-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-blue-600" />
+              <h3 className="text-sm font-bold text-slate-900">Generate Real-Time Interview Coding Problem</h3>
+            </div>
+            <button
+              onClick={() => setIsGeneratorOpen(false)}
+              className="text-slate-400 hover:text-slate-600 cursor-pointer text-xs"
+            >
+              ✕
+            </button>
+          </div>
+
+          <p className="text-xs text-slate-600">
+            Create an original, sandboxed coding challenge with multi-language starter code, test suites, and 4-tier hints on demand.
+          </p>
+
+          {genError && (
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+              {genError}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">Topic:</label>
+              <select
+                value={genTopic}
+                onChange={(e) => setGenTopic(e.target.value)}
+                className="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+              >
+                <option value="arrays">Arrays & Hashing</option>
+                <option value="strings">Strings & Two Pointers</option>
+                <option value="linked_lists">Linked Lists</option>
+                <option value="stacks_queues">Stacks & Queues</option>
+                <option value="trees_graphs">Trees & Graphs</option>
+                <option value="dynamic_programming">Dynamic Programming</option>
+                <option value="sql">SQL & Relational Logic</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">Difficulty:</label>
+              <select
+                value={genDifficulty}
+                onChange={(e) => setGenDifficulty(e.target.value)}
+                className="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+              >
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">Target Company:</label>
+              <select
+                value={genCompany}
+                onChange={(e) => setGenCompany(e.target.value)}
+                className="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+              >
+                <option value="Google">Google</option>
+                <option value="Amazon">Amazon</option>
+                <option value="Meta">Meta</option>
+                <option value="Microsoft">Microsoft</option>
+                <option value="Stripe">Stripe</option>
+                <option value="Uber">Uber</option>
+                <option value="Bloomberg">Bloomberg</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">Focus Pattern / Concept:</label>
+              <input
+                type="text"
+                value={genConcept}
+                onChange={(e) => setGenConcept(e.target.value)}
+                placeholder="e.g. Monotonic Stack, Sliding Window"
+                className="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-1">
+            <button
+              onClick={() => setIsGeneratorOpen(false)}
+              className="px-4 py-2 text-xs text-slate-600 hover:text-slate-800 font-semibold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleGenerateProblem}
+              disabled={isGeneratingProblem}
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-50 transition-colors"
+            >
+              {isGeneratingProblem ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Synthesizing Coding Challenge...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Generate Challenge with Test Cases</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Split Interface */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
