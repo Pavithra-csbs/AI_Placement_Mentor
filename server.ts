@@ -13,7 +13,6 @@ import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { db } from './src/server/db.ts';
 import { runCodeSafely } from './src/server/codeRunner.ts';
-import { hashPassword, verifyPassword, generateResetCode } from './src/server/authHelper.ts';
 
 dotenv.config();
 
@@ -82,22 +81,18 @@ async function callGeminiJson<T>(prompt: string, systemInstruction?: string, fal
 }
 
 // -------------------------------------------------------------
-// MODULE 1: ONBOARDING & AUTHENTICATION (LOGIN, REGISTER, FORGOT PASSWORD)
+// MODULE 1: ONBOARDING & AUTHENTICATION
 // -------------------------------------------------------------
-
-// Current active session / profile
 app.get('/api/auth/me', (req: Request, res: Response) => {
   const user = db.getActiveUser();
-  res.json({ success: true, user: user || null });
+  res.json({ success: true, user });
 });
 
-// All registered users list (for switching / demo testing)
 app.get('/api/auth/users', (req: Request, res: Response) => {
   const users = db.getUsers();
   res.json({ success: true, users });
 });
 
-// Switch active user
 app.post('/api/auth/switch-user', (req: Request, res: Response) => {
   const { userId } = req.body;
   if (!userId) return res.status(400).json({ success: false, error: 'User ID is required.' });
@@ -105,224 +100,6 @@ app.post('/api/auth/switch-user', (req: Request, res: Response) => {
   res.json({ success: true, user: db.getActiveUser() });
 });
 
-// Register new student account
-app.post('/api/auth/register', (req: Request, res: Response) => {
-  try {
-    const { name, email, password, target_role, experience_level, securityQuestion, securityAnswer } = req.body;
-
-    if (!name || !name.trim()) {
-      return res.status(400).json({ success: false, error: 'Full name is required.' });
-    }
-    if (!email || !email.trim()) {
-      return res.status(400).json({ success: false, error: 'Valid college or campus email is required.' });
-    }
-    if (!password || password.length < 6) {
-      return res.status(400).json({ success: false, error: 'Password must be at least 6 characters long.' });
-    }
-    if (!target_role) {
-      return res.status(400).json({ success: false, error: 'Target career role is required.' });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-    const existingUser = db.findUserByEmail(cleanEmail);
-    if (existingUser) {
-      return res.status(409).json({ 
-        success: false, 
-        error: 'An account with this email already exists. Please log in or reset your password.' 
-      });
-    }
-
-    // Hash password with salt
-    const { hash, salt } = hashPassword(password);
-
-    // Create user profile
-    const newUser = db.saveUser({
-      name: name.trim(),
-      email: cleanEmail,
-      target_role: target_role.trim(),
-      experience_level: experience_level || 'Intermediate (3rd/4th Year)',
-      current_skills: ['Java', 'Data Structures', 'SQL', 'Git'],
-      interests: ['System Design', 'Algorithms', 'Distributed Systems'],
-    });
-
-    // Save credential
-    db.saveCredential({
-      userId: newUser.id,
-      email: cleanEmail,
-      passwordHash: hash,
-      salt: salt,
-      securityQuestion: securityQuestion?.trim() || 'What was your first programming language?',
-      securityAnswer: securityAnswer?.trim() || 'Python',
-    });
-
-    // Set active session
-    db.setActiveUserId(newUser.id);
-
-    res.status(201).json({
-      success: true,
-      message: 'Account created successfully! Welcome to AI Placement Mentor.',
-      user: newUser,
-    });
-  } catch (err: any) {
-    console.error('Registration error:', err);
-    res.status(500).json({ success: false, error: 'Failed to complete registration.' });
-  }
-});
-
-// Login student account
-app.post('/api/auth/login', (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ success: false, error: 'Email and password are required.' });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-    const user = db.findUserByEmail(cleanEmail);
-    if (!user) {
-      return res.status(401).json({ success: false, error: 'Invalid email or password.' });
-    }
-
-    let credential = db.getCredentialByEmail(cleanEmail);
-
-    // If existing legacy user didn't have credential yet, bootstrap with default password
-    if (!credential) {
-      const defaultCred = hashPassword('Password123!');
-      credential = {
-        userId: user.id,
-        email: cleanEmail,
-        passwordHash: defaultCred.hash,
-        salt: defaultCred.salt,
-        securityQuestion: 'What was your first programming language?',
-        securityAnswer: 'Java',
-      };
-      db.saveCredential(credential);
-    }
-
-    const isValid = verifyPassword(password, credential.passwordHash, credential.salt);
-    if (!isValid) {
-      return res.status(401).json({ success: false, error: 'Invalid email or password.' });
-    }
-
-    // Set as active session
-    db.setActiveUserId(user.id);
-
-    res.json({
-      success: true,
-      message: `Welcome back, ${user.name}!`,
-      user,
-    });
-  } catch (err: any) {
-    console.error('Login error:', err);
-    res.status(500).json({ success: false, error: 'An unexpected error occurred during login.' });
-  }
-});
-
-// Logout student account
-app.post('/api/auth/logout', (req: Request, res: Response) => {
-  db.logoutUser();
-  res.json({ success: true, message: 'Logged out successfully.' });
-});
-
-// Request password reset (Forgot Password Step 1)
-app.post('/api/auth/forgot-password/request', (req: Request, res: Response) => {
-  try {
-    const { email } = req.body;
-    if (!email || !email.trim()) {
-      return res.status(400).json({ success: false, error: 'Please enter your registered email address.' });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-    const user = db.findUserByEmail(cleanEmail);
-    if (!user) {
-      return res.status(404).json({ success: false, error: 'No account found with this email address.' });
-    }
-
-    const code = generateResetCode();
-    // Valid for 15 minutes
-    db.setResetCode(cleanEmail, code, 15);
-
-    const cred = db.getCredentialByEmail(cleanEmail);
-
-    res.json({
-      success: true,
-      message: `Password reset verification code generated for ${cleanEmail}.`,
-      // For instantaneous evaluation and seamless testing in preview, provide the code directly
-      demoResetCode: code,
-      securityQuestion: cred?.securityQuestion || 'What was your first programming language?',
-    });
-  } catch (err: any) {
-    console.error('Forgot password request error:', err);
-    res.status(500).json({ success: false, error: 'Failed to process password reset request.' });
-  }
-});
-
-// Verify reset code (Forgot Password Step 1.5)
-app.post('/api/auth/forgot-password/verify-code', (req: Request, res: Response) => {
-  const { email, code } = req.body;
-  if (!email || !code) {
-    return res.status(400).json({ success: false, error: 'Email and reset code are required.' });
-  }
-
-  const isValid = db.verifyResetCode(email, code);
-  if (!isValid) {
-    return res.status(400).json({ success: false, error: 'Invalid or expired 6-digit reset code.' });
-  }
-
-  res.json({ success: true, verified: true });
-});
-
-// Reset password with new credentials (Forgot Password Step 2)
-app.post('/api/auth/forgot-password/reset', (req: Request, res: Response) => {
-  try {
-    const { email, code, newPassword, securityAnswer } = req.body;
-
-    if (!email || !code || !newPassword) {
-      return res.status(400).json({ success: false, error: 'Email, verification code, and new password are required.' });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({ success: false, error: 'New password must be at least 6 characters long.' });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-    const isCodeValid = db.verifyResetCode(cleanEmail, code);
-    if (!isCodeValid) {
-      return res.status(400).json({ success: false, error: 'Invalid or expired 6-digit verification code.' });
-    }
-
-    const cred = db.getCredentialByEmail(cleanEmail);
-    if (cred && cred.securityAnswer && securityAnswer) {
-      if (cred.securityAnswer.trim().toLowerCase() !== securityAnswer.trim().toLowerCase()) {
-        return res.status(400).json({ success: false, error: 'Security answer does not match our records.' });
-      }
-    }
-
-    const { hash, salt } = hashPassword(newPassword);
-    const updated = db.updatePassword(cleanEmail, hash, salt);
-
-    if (!updated) {
-      return res.status(404).json({ success: false, error: 'Could not update password. Account not found.' });
-    }
-
-    // Auto login after reset
-    const user = db.findUserByEmail(cleanEmail);
-    if (user) {
-      db.setActiveUserId(user.id);
-    }
-
-    res.json({
-      success: true,
-      message: 'Password has been reset successfully! You can now log in with your new password.',
-      user: user || null,
-    });
-  } catch (err: any) {
-    console.error('Password reset error:', err);
-    res.status(500).json({ success: false, error: 'Failed to reset password.' });
-  }
-});
-
-// Update profile / onboarding
 app.post('/api/auth/onboarding', (req: Request, res: Response) => {
   const { name, email, target_role, experience_level, current_skills, interests } = req.body;
   if (!name || !email || !target_role) {

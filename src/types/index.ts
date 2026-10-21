@@ -28,19 +28,6 @@ export interface UserProfile {
   updated_at: string;
 }
 
-export interface UserCredential {
-  userId: string;
-  email: string;
-  passwordHash: string;
-  salt: string;
-  securityQuestion?: string;
-  securityAnswer?: string;
-  resetCode?: string;
-  resetCodeExpires?: number;
-}
-
-export type AuthMode = 'login' | 'register' | 'forgot_password';
-
 export interface RoleInfo {
   id: JobRole;
   title: string;
